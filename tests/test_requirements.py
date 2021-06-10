@@ -27,3 +27,9 @@ def pkg(mockpi: MockPI) -> Generator[None, None, None]:
 def test_install_package(pkg: None) -> None:
     scriptenv.requires(DefaultPackageName)
     __import__(DefaultPackageName)
+
+
+def test_suppess_stdout(pkg: None, capsys: pytest.CaptureFixture[str]) -> None:
+    scriptenv.requires(DefaultPackageName)
+    out, _ = capsys.readouterr()
+    assert not out

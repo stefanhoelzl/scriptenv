@@ -27,8 +27,20 @@ setup(
 def _serve_directory(path: Path) -> Generator[str, None, None]:
     host, port = "localhost", 9000
 
-    handler_class = partial(SimpleHTTPRequestHandler, directory=path.absolute())
-    with ThreadingHTTPServer((host, port), handler_class) as httpd:
+    class SilentHTTPRequestHandler(SimpleHTTPRequestHandler):
+        """SimpleHTTPRequestHandler without logging."""
+
+        def log_message(
+            self,
+            format: str,  # pylint: disable=unused-argument,redefined-builtin
+            *args: str,
+        ) -> None:
+            """Discard all log messages."""
+            return
+
+    with ThreadingHTTPServer(
+        (host, port), partial(SilentHTTPRequestHandler, directory=path.absolute())
+    ) as httpd:
         thread = Thread(target=httpd.serve_forever)
         thread.start()
         yield f"http://{host}:{port}"

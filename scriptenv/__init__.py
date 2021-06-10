@@ -1,5 +1,7 @@
 """scriptenv"""
+import io
 import sys
+from contextlib import redirect_stdout
 from pip._internal.commands import create_command
 
 
@@ -12,7 +14,8 @@ def requires(requirements: str) -> None:
     Arguments:
         requirements: List of pip requirements required to be installed.
     """
-    create_command("install").main(
-        ["--no-user", "--target", f"/tmp/scriptenv/{requirements}", requirements]
-    )
+    with redirect_stdout(io.StringIO()):
+        create_command("install").main(
+            ["--no-user", "--target", f"/tmp/scriptenv/{requirements}", requirements]
+        )
     sys.path[0:0] = [f"/tmp/scriptenv/{requirements}"]
