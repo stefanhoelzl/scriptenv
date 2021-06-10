@@ -60,7 +60,7 @@ class MockPI:
         self, pkg: str, version: str = "0.0.1", dependencies: Optional[List[str]] = None
     ) -> None:
         """Adds a dummy package to the pypi server"""
-        package_path = self._build_path / pkg
+        package_path = self._build_path / f"{pkg}_{version}"
         package_path.mkdir(parents=True)
 
         setup_py = package_path / "setup.py"
@@ -69,7 +69,7 @@ class MockPI:
                 package=pkg, version=version, install_requires=str(dependencies)
             )
         )
-        (package_path / f"{pkg}.py").write_text("")
+        (package_path / f"{pkg}.py").write_text(f"__version__ = '{version}'")
 
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             sandbox.run_setup(str(setup_py.absolute()), ["sdist"])
@@ -84,5 +84,7 @@ class MockPI:
     def server(self) -> Generator[None, None, None]:
         """Starts the pypi server"""
         with _serve_directory(self._serve_path) as url:
-            with patch.dict(os.environ, dict(PIP_INDEX_URL=url)):
+            with patch.dict(
+                os.environ, dict(PIP_INDEX_URL=url, PIP_NO_CACHE_DIR="off")
+            ):
                 yield

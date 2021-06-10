@@ -42,6 +42,17 @@ def test_install_multiple_packages(mockpi: MockPI) -> None:
     __import__(another_package)
 
 
+def test_install_specific_version(mockpi: MockPI) -> None:
+    wanted_version = "0.2.0"
+    mockpi.add(DefaultPackageName, version="0.1.0")
+    mockpi.add(DefaultPackageName, version=wanted_version)
+
+    with mockpi.server():
+        scriptenv.requires(f"{DefaultPackageName}=={wanted_version}")
+
+    assert __import__(DefaultPackageName).__version__ == wanted_version
+
+
 def test_suppess_stdout(pkg: None, capsys: pytest.CaptureFixture[str]) -> None:
     scriptenv.requires(DefaultPackageName)
 
