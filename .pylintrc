@@ -1,0 +1,4 @@
+[BASIC]
+
+# Naming style matching correct class constant names.
+const-naming-style=PascalCase

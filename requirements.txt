@@ -1,0 +1,10 @@
+-e .
+
+pytest==6.2.4
+pytest-mccabe==2.0
+pytest-mypy==0.8.1
+pytest-pylint==0.18.0
+pytest-cov==2.12.1
+pytest-black==0.3.12
+
+black==21.5b2

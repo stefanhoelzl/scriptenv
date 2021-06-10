@@ -1,0 +1,27 @@
+name: run unittests
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        python: [3.7, 3.8, 3.9]
+        os: [windows-2019, ubuntu-20.04, macos-10.15]
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1.2.0
+        with:
+          submodules: true
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{matrix.python}}
+      - name: Install requirements
+        shell: bash
+        run: |
+          pip install -r requirements.txt
+      - name: Run Unittests
+        shell: bash
+        run: |
+          pytest
