@@ -12,5 +12,6 @@ setup(
     author_email=f"stefanh+{ProjectName}@posteo.de",
     license="MIT",
     packages=[ProjectName],
+    install_requires=["pip>=19.3"],
     zip_safe=False,
 )
