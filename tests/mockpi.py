@@ -1,10 +1,11 @@
 """Mocks a pypi server"""
 
 import os
+import io
 from pathlib import Path
 from typing import Optional, List, Generator
 from unittest.mock import patch
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from functools import partial
 from threading import Thread
@@ -70,7 +71,8 @@ class MockPI:
         )
         (package_path / f"{pkg}.py").write_text("")
 
-        sandbox.run_setup(str(setup_py.absolute()), ["sdist"])
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            sandbox.run_setup(str(setup_py.absolute()), ["sdist"])
 
         tar_name = f"{pkg}-{version}.tar.gz"
         dist_path = package_path / "dist" / tar_name

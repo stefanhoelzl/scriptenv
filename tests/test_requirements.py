@@ -26,10 +26,24 @@ def pkg(mockpi: MockPI) -> Generator[None, None, None]:
 
 def test_install_package(pkg: None) -> None:
     scriptenv.requires(DefaultPackageName)
+
     __import__(DefaultPackageName)
+
+
+def test_install_multiple_packages(mockpi: MockPI) -> None:
+    another_package = DefaultPackageName + "another"
+    mockpi.add(DefaultPackageName)
+    mockpi.add(another_package)
+
+    with mockpi.server():
+        scriptenv.requires(DefaultPackageName, another_package)
+
+    __import__(DefaultPackageName)
+    __import__(another_package)
 
 
 def test_suppess_stdout(pkg: None, capsys: pytest.CaptureFixture[str]) -> None:
     scriptenv.requires(DefaultPackageName)
+
     out, _ = capsys.readouterr()
     assert not out
