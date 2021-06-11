@@ -3,7 +3,6 @@ import io
 import re
 import sys
 from contextlib import redirect_stdout
-from typing import Tuple
 from pathlib import Path
 
 import appdirs
@@ -26,25 +25,28 @@ def requires(*requirements: str) -> None:
     download_path = (base_path / "download").absolute()
     install_path = (base_path / "install").absolute()
 
+    stdout = _pip("download", "--dest", str(download_path), *requirements)
+    packages = {
+        match.group("pkg")
+        for match in re.finditer(r"/(?P<pkg>[^/]+?\.tar\.gz)", stdout)
+    }
+
+    for package in packages:
+        package_install_path = install_path / package
+        if not package_install_path.exists():
+            _pip(
+                "install",
+                "--no-deps",
+                "--no-user",
+                "--target",
+                str(package_install_path),
+                str(download_path / package),
+            )
+        sys.path[0:0] = [str(package_install_path)]
+
+
+def _pip(command: str, *args: str) -> str:
     stdout = io.StringIO()
     with redirect_stdout(stdout):
-        create_command("download").main(["--dest", str(download_path), *requirements])
-
-        packages = {
-            match.group("pkg")
-            for match in re.finditer(r"/(?P<pkg>[^/]+?\.tar\.gz)", stdout.getvalue())
-        }
-
-        for package in packages:
-            package_install_path = install_path / package
-            if not package_install_path.exists():
-                create_command("install").main(
-                    [
-                        "--no-deps",
-                        "--no-user",
-                        "--target",
-                        str(package_install_path),
-                        str(download_path / package),
-                    ]
-                )
-            sys.path[0:0] = [str(package_install_path)]
+        create_command(command).main(list(args))
+    return stdout.getvalue()
