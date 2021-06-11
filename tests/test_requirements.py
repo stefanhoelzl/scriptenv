@@ -2,13 +2,11 @@
 from pathlib import Path
 from typing import Generator
 
+import appdirs
+import pytest
 from mockpi import MockPI
 
-import pytest
-import appdirs
-
 import scriptenv
-
 
 DefaultPackageName = "scriptenvtestpackage"
 

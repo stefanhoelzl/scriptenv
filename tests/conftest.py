@@ -1,11 +1,11 @@
 # pylint: disable=missing-module-docstring
 import sys
-from typing import Generator
 from pathlib import Path
+from typing import Generator
 from unittest.mock import patch
 
-import pytest
 import appdirs
+import pytest
 
 
 @pytest.fixture(autouse=True, scope="function")

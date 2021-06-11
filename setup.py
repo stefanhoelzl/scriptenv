@@ -1,7 +1,8 @@
 """scriptenv setup script"""
 
 from setuptools import setup
-from scriptenv import __version__, __author__
+
+from scriptenv import __author__, __version__
 
 ProjectName = "scriptenv"
 

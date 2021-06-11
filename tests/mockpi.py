@@ -1,14 +1,14 @@
 """Mocks a pypi server"""
 
-import os
 import io
-from pathlib import Path
-from typing import Optional, List, Generator
-from unittest.mock import patch
+import os
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
-from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from threading import Thread
+from typing import Generator, List, Optional
+from unittest.mock import patch
 
 from setuptools import sandbox
 
