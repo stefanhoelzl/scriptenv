@@ -1,17 +1,18 @@
 """scriptenv setup script"""
 
 from setuptools import setup
+from scriptenv import __version__, __author__
 
 ProjectName = "scriptenv"
 
 setup(
     name=ProjectName,
-    version="0.0.1",
+    version=__version__,
     url="https://github.com/stefanhoelzl/requirements/",
-    author="Stefan Hoelzl",
+    author=__author__,
     author_email=f"stefanh+{ProjectName}@posteo.de",
     license="MIT",
     packages=[ProjectName],
-    install_requires=["pip>=19.3"],
+    install_requires=["pip>=19.3", "appdirs"],
     zip_safe=False,
 )

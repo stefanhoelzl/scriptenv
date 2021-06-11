@@ -5,6 +5,7 @@ from typing import Generator
 from mockpi import MockPI
 
 import pytest
+import appdirs
 
 import scriptenv
 
@@ -18,16 +19,16 @@ def mockpi(tmp_path: Path) -> MockPI:
 
 
 @pytest.fixture
-def pkg(mockpi: MockPI) -> Generator[None, None, None]:
+def default_pkg(mockpi: MockPI) -> Generator[str, None, None]:
     mockpi.add(DefaultPackageName)
     with mockpi.server():
-        yield
+        yield DefaultPackageName
 
 
-def test_install_package(pkg: None) -> None:
-    scriptenv.requires(DefaultPackageName)
+def test_install_package(default_pkg: str) -> None:
+    scriptenv.requires(default_pkg)
 
-    __import__(DefaultPackageName)
+    __import__(default_pkg)
 
 
 def test_install_multiple_packages(mockpi: MockPI) -> None:
@@ -75,8 +76,22 @@ def test_cache_packages(mockpi: MockPI) -> None:
     assert mockpi.count_requests(DefaultPackageName, version) == 1
 
 
-def test_suppess_stdout(pkg: None, capsys: pytest.CaptureFixture[str]) -> None:
-    scriptenv.requires(DefaultPackageName)
+def test_use_user_cache_dir(default_pkg: str) -> None:
+    cache_path = Path(
+        appdirs.user_cache_dir(
+            scriptenv.__name__, scriptenv.__author__, version=scriptenv.__version__
+        ),
+        "download",
+    )
+    assert not cache_path.exists()
+
+    scriptenv.requires(default_pkg)
+
+    assert len(list(cache_path.iterdir())) == 1
+
+
+def test_suppess_stdout(default_pkg: str, capsys: pytest.CaptureFixture[str]) -> None:
+    scriptenv.requires(default_pkg)
 
     out, _ = capsys.readouterr()
     assert not out

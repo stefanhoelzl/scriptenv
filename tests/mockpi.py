@@ -23,6 +23,11 @@ setup(
 )
 """
 
+PackagePyTemplate = """
+__version__ = '{version}'
+__mock__ = True
+"""
+
 
 @contextmanager
 def _serve_directory(path: Path, requests: List[str]) -> Generator[str, None, None]:
@@ -75,7 +80,9 @@ class MockPI:
                 package=pkg, version=version, install_requires=str(dependencies)
             )
         )
-        (package_path / f"{pkg}.py").write_text(f"__version__ = '{version}'")
+        (package_path / f"{pkg}.py").write_text(
+            PackagePyTemplate.format(version=version)
+        )
 
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             sandbox.run_setup(str(setup_py.absolute()), ["sdist"])
