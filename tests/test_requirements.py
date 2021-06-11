@@ -76,18 +76,21 @@ def test_cache_packages(mockpi: MockPI) -> None:
     assert mockpi.count_requests(DefaultPackageName, version) == 1
 
 
-def test_use_user_cache_dir(default_pkg: str) -> None:
+def test_use_cache_dir(default_pkg: str) -> None:
     cache_path = Path(
         appdirs.user_cache_dir(
             scriptenv.__name__, scriptenv.__author__, version=scriptenv.__version__
-        ),
-        "download",
+        )
     )
+    download_path = cache_path / "download"
+    install_path = cache_path / "install"
+
     assert not cache_path.exists()
 
     scriptenv.requires(default_pkg)
 
-    assert len(list(cache_path.iterdir())) == 1
+    assert len(list(download_path.iterdir())) == 1
+    assert len(list(install_path.iterdir())) == 1
 
 
 def test_suppess_stdout(default_pkg: str, capsys: pytest.CaptureFixture[str]) -> None:
