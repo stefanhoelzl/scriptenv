@@ -64,6 +64,17 @@ def test_install_dependencies(mockpi: MockPI) -> None:
     __import__(dependency)
 
 
+def test_cache_packages(mockpi: MockPI) -> None:
+    version = "0.1.0"
+    mockpi.add(DefaultPackageName, version=version)
+
+    with mockpi.server():
+        scriptenv.requires(DefaultPackageName)
+        scriptenv.requires(DefaultPackageName)
+
+    assert mockpi.count_requests(DefaultPackageName, version) == 1
+
+
 def test_suppess_stdout(pkg: None, capsys: pytest.CaptureFixture[str]) -> None:
     scriptenv.requires(DefaultPackageName)
 

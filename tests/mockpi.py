@@ -25,7 +25,7 @@ setup(
 
 
 @contextmanager
-def _serve_directory(path: Path) -> Generator[str, None, None]:
+def _serve_directory(path: Path, requests: List[str]) -> Generator[str, None, None]:
     host, port = "localhost", 9000
 
     class SilentHTTPRequestHandler(SimpleHTTPRequestHandler):
@@ -38,6 +38,11 @@ def _serve_directory(path: Path) -> Generator[str, None, None]:
         ) -> None:
             """Discard all log messages."""
             return
+
+        def do_GET(self) -> None:
+            """Records all requests."""
+            requests.append(self.path)
+            return super().do_GET()
 
     with ThreadingHTTPServer(
         (host, port), partial(SilentHTTPRequestHandler, directory=path.absolute())
@@ -55,6 +60,7 @@ class MockPI:
     def __init__(self, path: Path):
         self._serve_path = path / "packages"
         self._build_path = path / "build"
+        self._requests: List[str] = list()
 
     def add(
         self, pkg: str, version: str = "0.0.1", dependencies: Optional[List[str]] = None
@@ -83,8 +89,12 @@ class MockPI:
     @contextmanager
     def server(self) -> Generator[None, None, None]:
         """Starts the pypi server"""
-        with _serve_directory(self._serve_path) as url:
+        with _serve_directory(self._serve_path, self._requests) as url:
             with patch.dict(
                 os.environ, dict(PIP_INDEX_URL=url, PIP_NO_CACHE_DIR="off")
             ):
                 yield
+
+    def count_requests(self, package: str, version: str) -> int:
+        """Returns the number of requests made for a specific package version."""
+        return self._requests.count(f"/{package}/{package}-{version}.tar.gz")

@@ -1,5 +1,6 @@
 """scriptenv"""
 import io
+import re
 import sys
 from contextlib import redirect_stdout
 from typing import Tuple
@@ -16,8 +17,25 @@ def requires(*requirements: str) -> None:
     Arguments:
         requirements: List of pip requirements required to be installed.
     """
-    with redirect_stdout(io.StringIO()):
-        create_command("install").main(
-            ["--no-user", "--target", "/tmp/scriptenv", *requirements]
+    stdout = io.StringIO()
+    with redirect_stdout(stdout):
+        create_command("download").main(
+            ["--dest", "/tmp/scriptenv/cache", *requirements]
         )
-        sys.path[0:0] = ["/tmp/scriptenv/"]
+
+        packages = {
+            match.group("pkg")
+            for match in re.finditer(r"/(?P<pkg>[^/]+?\.tar\.gz)", stdout.getvalue())
+        }
+
+        for package in packages:
+            create_command("install").main(
+                [
+                    "--no-deps",
+                    "--no-user",
+                    "--target",
+                    f"/tmp/scriptenv/{package}",
+                    f"/tmp/scriptenv/cache/{package}",
+                ]
+            )
+            sys.path[0:0] = [f"/tmp/scriptenv/{package}"]
