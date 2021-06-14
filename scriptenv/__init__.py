@@ -1,5 +1,7 @@
 """scriptenv"""
+import hashlib
 import io
+import json
 import re
 import sys
 from contextlib import redirect_stdout
@@ -24,12 +26,23 @@ def requires(*requirements: str) -> None:
     base_path = Path(appdirs.user_cache_dir(__name__, __author__, version=__version__))
     download_path = (base_path / "download").absolute()
     install_path = (base_path / "install").absolute()
+    dependencies_path = (base_path / "dependencies").absolute()
+    dependencies_path.mkdir(parents=True, exist_ok=True)
 
-    stdout = _pip("download", "--dest", str(download_path), *requirements)
-    packages = {
-        match.group("pkg")
-        for match in re.finditer(r"/(?P<pkg>[^/]+?\.tar\.gz)", stdout)
-    }
+    requirements_hash = hashlib.md5(
+        "\n".join(sorted(requirements)).encode("utf-8")
+    ).hexdigest()
+    requirements_list_path = dependencies_path / requirements_hash
+
+    if not requirements_list_path.exists():
+        stdout = _pip("download", "--dest", str(download_path), *requirements)
+        packages = {
+            match.group("pkg")
+            for match in re.finditer(r"/(?P<pkg>[^/]+?\.tar\.gz)", stdout)
+        }
+        requirements_list_path.write_text(json.dumps(list(packages)))
+    else:
+        packages = set(json.loads(requirements_list_path.read_text()))
 
     for package in packages:
         package_install_path = install_path / package

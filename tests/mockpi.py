@@ -102,6 +102,14 @@ class MockPI:
             ):
                 yield
 
-    def count_requests(self, package: str, version: str) -> int:
+    def reset_requests(self) -> None:
+        """Resets the recorded requests."""
+        self._requests.clear()
+
+    def count_requests(self) -> int:
+        """Returns the number of requests made in total."""
+        return len(self._requests)
+
+    def count_package_requests(self, package: str, version: str) -> int:
         """Returns the number of requests made for a specific package version."""
         return self._requests.count(f"/{package}/{package}-{version}.tar.gz")

@@ -65,13 +65,27 @@ def test_install_dependencies(mockpi: MockPI) -> None:
 
 def test_cache_packages(mockpi: MockPI) -> None:
     version = "0.1.0"
+    another_package = DefaultPackageName + "another"
+    mockpi.add(DefaultPackageName, version=version)
+    mockpi.add(another_package, dependencies=[DefaultPackageName])
+
+    with mockpi.server():
+        scriptenv.requires(DefaultPackageName)
+        scriptenv.requires(another_package)
+
+    assert mockpi.count_package_requests(DefaultPackageName, version) == 1
+
+
+def test_cache_dependency_list(mockpi: MockPI) -> None:
+    version = "0.1.0"
     mockpi.add(DefaultPackageName, version=version)
 
     with mockpi.server():
         scriptenv.requires(DefaultPackageName)
+        mockpi.reset_requests()
         scriptenv.requires(DefaultPackageName)
 
-    assert mockpi.count_requests(DefaultPackageName, version) == 1
+    assert mockpi.count_requests() == 0
 
 
 def test_use_cache_dir(default_pkg: str) -> None:
