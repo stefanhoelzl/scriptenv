@@ -63,6 +63,18 @@ def test_install_dependencies(mockpi: MockPI) -> None:
     __import__(dependency)
 
 
+def test_supported_package_types(mockpi: MockPI) -> None:
+    packages = dict(tarpackage="sdist", wheelpackage="bdist_wheel")
+    for name, dist_type in packages.items():
+        mockpi.add(name, dist_type=dist_type)
+
+    with mockpi.server():
+        scriptenv.requires(*packages)
+
+    for package in packages:
+        __import__(package)
+
+
 def test_cache_packages(mockpi: MockPI) -> None:
     version = "0.1.0"
     another_package = DefaultPackageName + "another"

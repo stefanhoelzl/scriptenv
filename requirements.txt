@@ -10,3 +10,4 @@ pytest-isort==2.0.0
 
 black==21.5b2
 isort==5.8.0
+wheel==0.36.2

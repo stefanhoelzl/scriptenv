@@ -68,7 +68,11 @@ class MockPI:
         self._requests: List[str] = list()
 
     def add(
-        self, pkg: str, version: str = "0.0.1", dependencies: Optional[List[str]] = None
+        self,
+        pkg: str,
+        version: str = "0.0.1",
+        dependencies: Optional[List[str]] = None,
+        dist_type: str = "sdist",
     ) -> None:
         """Adds a dummy package to the pypi server"""
         package_path = self._build_path / f"{pkg}_{version}"
@@ -85,13 +89,12 @@ class MockPI:
         )
 
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-            sandbox.run_setup(str(setup_py.absolute()), ["sdist"])
+            sandbox.run_setup(str(setup_py.absolute()), [dist_type])
 
-        tar_name = f"{pkg}-{version}.tar.gz"
-        dist_path = package_path / "dist" / tar_name
+        dist_path = next((package_path / "dist").iterdir())
         serve_path = self._serve_path / pkg
         serve_path.mkdir(parents=True, exist_ok=True)
-        (serve_path / tar_name).write_bytes(dist_path.read_bytes())
+        (serve_path / dist_path.name).write_bytes(dist_path.read_bytes())
 
     @contextmanager
     def server(self) -> Generator[None, None, None]:
