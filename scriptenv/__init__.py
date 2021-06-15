@@ -38,7 +38,9 @@ def requires(*requirements: str) -> None:
         stdout = _pip("download", "--dest", str(download_path), *requirements)
         packages = {
             match.group("pkg")
-            for match in re.finditer(r"/(?P<pkg>[^/]+?(\.tar\.gz|\.whl))", stdout)
+            for match in re.finditer(
+                r"(/|\\)(?P<pkg>[^(/|\\)]+?(\.tar\.gz|\.whl))", stdout
+            )
         }
         requirements_list_path.write_text(json.dumps(list(packages)))
     else:

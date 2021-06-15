@@ -28,4 +28,4 @@ jobs:
       - name: Run Integration Tests
         shell: bash
         run: |
-          python -c "import scriptenv; scriptenv.requires('numpy==1.20.0'); import numpy; print(numpy.__version__)"
+          python -c "import scriptenv; scriptenv.requires('requests==2.25.1'); import requests; print(requests.__version__)"
