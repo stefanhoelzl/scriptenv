@@ -17,11 +17,15 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{matrix.python}}
-      - name: Install requirements
+      - name: Install Requirements
         shell: bash
         run: |
           pip install -r requirements.txt
-      - name: Run Unittests
+      - name: Run Unit Tests
         shell: bash
         run: |
           pytest
+      - name: Run Integration Tests
+        shell: bash
+        run: |
+          python -c "import scriptenv; scriptenv.requires('numpy==1.20.0'); import numpy; print(numpy.__version__)"
