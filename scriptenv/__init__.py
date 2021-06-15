@@ -10,8 +10,8 @@ from pathlib import Path
 import appdirs
 from pip._internal.commands import create_command
 
-__version__ = "0.0.1"
 __author__ = "stefanhoelzl"
+__version__ = "0.0.1"
 
 
 def requires(*requirements: str) -> None:
