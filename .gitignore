@@ -5,3 +5,5 @@ htmlcov
 __pycache__
 venv
 scriptenv.egg-info
+build
+dist
