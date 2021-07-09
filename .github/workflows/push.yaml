@@ -1,31 +1,6 @@
 on: [push]
 name: push
 jobs:
-  test:
-    strategy:
-      matrix:
-        python: [3.9, 3.8, 3.7]
-        os: [ubuntu-20.04, macos-10.15, windows-2019]
-    runs-on: ${{matrix.os}}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v1.2.0
-      - name: Setup Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{matrix.python}}
-      - name: Install Requirements
-        run: |
-          pip install -r dev-requirements.txt
-      - name: Install Scriptenv
-        run: |
-          pip install -e .
-      - name: Run Unit Tests
-        run: |
-          pytest
-      - name: Run Integration Tests
-        run: |
-          python -c "import scriptenv; scriptenv.requires('requests==2.25.1'); import requests; print(requests.__version__)"
   build:
     runs-on: ubuntu-20.04
     steps:
@@ -41,20 +16,45 @@ jobs:
       - name: Build Wheel
         run: |
           python setup.py bdist_wheel
-      - name: Install Wheel
-        run: |
-          pip install dist/*.whl
-      - name: Test Installation
-        run: |
-          python -c "import scriptenv"
       - name: Upload Wheel
         uses: actions/upload-artifact@v2
         with:
           name: wheel
           path: dist
+  test:
+    strategy:
+      matrix:
+        python: [3.9, 3.8, 3.7]
+        os: [ubuntu-20.04, macos-10.15, windows-2019]
+    runs-on: ${{matrix.os}}
+    needs: [build]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1.2.0
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{matrix.python}}
+      - name: Download Wheel
+        uses: actions/download-artifact@v2
+        with:
+          name: wheel
+          path: dist
+      - name: Install Requirements
+        run: |
+          pip install -r dev-requirements.txt
+      - name: Install Scriptenv
+        run: |
+          pip install -e .
+      - name: Run Unit Tests
+        run: |
+          pytest
+      - name: Run Integration Tests
+        run: |
+          python -c "import scriptenv; scriptenv.requires('requests==2.25.1'); import requests; assert requests.__version__ == '2.25.1'"
   release:
     runs-on: ubuntu-20.04
-    needs: [test, build]
+    needs: [test]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v1.2.0
@@ -67,10 +67,16 @@ jobs:
         with:
           name: wheel
           path: dist
-      - name: Publish Latest GitHub Release
+      - name: Delete Previous Latest Github Release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          tag_name: latest
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish Latest Github Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          gh release delete latest --yes
           gh release create latest ./dist/*.whl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
