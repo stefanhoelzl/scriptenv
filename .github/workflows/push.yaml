@@ -12,7 +12,7 @@ jobs:
           python-version: 3.9
       - name: Install Requirements
         run: |
-          pip install wheel==0.36.2
+          pip install -r dev-requirements.txt
       - name: Build Wheel
         run: |
           python setup.py bdist_wheel
@@ -58,15 +58,26 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v1.2.0
+        with:
+          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v1
         with:
           python-version: 3.9
+      - name: Install Requirements
+        run: |
+          pip install -r dev-requirements.txt
       - name: Download Wheel
         uses: actions/download-artifact@v2
         with:
           name: wheel
           path: dist
+      - name: Check Commit Messages
+        run: |
+          python release.py check-commit-messages
+      - name: Generate Changelog
+        run: |
+          python release.py changelog > changelog.md
       - name: Delete Previous Latest Github Release
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
@@ -77,6 +88,6 @@ jobs:
       - name: Publish Latest Github Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          gh release create latest ./dist/*.whl
+          gh release create latest ./dist/*.whl -F changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

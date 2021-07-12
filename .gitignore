@@ -6,3 +6,4 @@ venv
 scriptenv.egg-info
 build
 dist
+changelog.md
