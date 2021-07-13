@@ -2,16 +2,17 @@
 
 import os
 from pathlib import Path
-from typing import Callable, Generator, List, cast
+from typing import Callable, Dict, Generator, List, cast
 from uuid import uuid4 as uuid
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 from pytest_git import GitRepo
 
-from release import changelog, check_commit_messages
+from release import changelog, check_commit_messages, version
 
 CommitFactory = Callable[[List[str]], List[str]]
+TagFactory = Callable[[Dict[str, str]], None]
 
 
 @pytest.fixture(autouse=True)
@@ -37,16 +38,29 @@ def commit_factory(git_repo: GitRepo) -> CommitFactory:
             Path(git_repo.workspace, new_file_name).write_text("")
             git_repo.run(f"git add {new_file_name}", capture=True)
             git_repo.run(f'git commit -m"{commit}"', capture=True)
-        return (
-            cast(
-                str,
-                git_repo.run(f'git log --pretty="%H" -n{len(commits)}', capture=True),
+        return list(
+            reversed(
+                cast(
+                    str,
+                    git_repo.run(
+                        f'git log --pretty="%H" -n{len(commits)}', capture=True
+                    ),
+                )
+                .strip()
+                .split("\n")
             )
-            .strip()
-            .split("\n")
         )
 
     return _commit_factory
+
+
+@pytest.fixture
+def tag_factory(git_repo: GitRepo) -> TagFactory:
+    def _tag_factory(tags: Dict[str, str]) -> None:
+        for tag, commit in tags.items():
+            git_repo.run(f"git tag {tag} {commit}", capture=True)
+
+    return _tag_factory
 
 
 @pytest.mark.parametrize(
@@ -89,9 +103,57 @@ def test_changelog(commit_factory: CommitFactory) -> None:
     ]
 
 
+def test_changelog_in_commit_order(commit_factory: CommitFactory) -> None:
+    commit_factory(
+        [
+            "[feature] feature0",
+            "[feature] feature1",
+        ]
+    )
+    assert list(changelog()) == [
+        "* Features",
+        "  * feature0",
+        "  * feature1",
+    ]
+
+
 def test_changelog_omit_empty_categories(commit_factory: CommitFactory) -> None:
     commit_factory(["[feature] feature"])
     assert list(changelog()) == [
         "* Features",
         "  * feature",
     ]
+
+
+def test_changelog_since_last_version_by_default(
+    commit_factory: CommitFactory, tag_factory: TagFactory
+) -> None:
+    commit_hashes = commit_factory(["[feature] feature0", "[feature] feature1"])
+    tag_factory({"v0.1.0": commit_hashes[0]})
+
+    assert list(changelog()) == [
+        "* Features",
+        "  * feature1",
+    ]
+
+
+def test_version_initial(commit_factory: CommitFactory) -> None:
+    commit_hashes = commit_factory(["[feature] first", "[feature] second"])
+    last_commit_hash_short = commit_hashes[-1][:7]
+    assert version() == f"0.1.0.{last_commit_hash_short}"
+
+
+def test_version_next_minor(
+    commit_factory: CommitFactory, tag_factory: TagFactory
+) -> None:
+    commit_hashes = commit_factory(["[feature] initial", "[feature] next"])
+    tag_factory({"v0.1.0": commit_hashes[0]})
+    assert version() == f"0.2.0.{commit_hashes[-1][:7]}"
+
+
+def test_version_next_patch(
+    commit_factory: CommitFactory, tag_factory: TagFactory
+) -> None:
+    commit_hashes = commit_factory(["[feature] initial", "[bugfix] next"])
+    tag_factory({"v0.1.0": commit_hashes[0]})
+    assert version() == f"0.1.1.{commit_hashes[-1][:7]}"
