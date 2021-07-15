@@ -1,6 +1,22 @@
-on: [push]
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "release-candidate"
 name: push
 jobs:
+  cleanup:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Clean Up Release Candiate Tag
+        if: ${{ github.ref == 'refs/tags/release-candidate' }}
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          tag_name: release-candidate
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build:
     runs-on: ubuntu-20.04
     steps:
@@ -91,3 +107,25 @@ jobs:
           gh release create latest ./dist/*.whl -F changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish Github Release
+        if: ${{ github.ref == 'refs/tags/release-candidate' }}
+        run: |
+          gh release create v`python release.py version` ./dist/*.whl -F changelog.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set Default Deployment Environment
+        run: |
+          echo "PYPI_INDEX_URL=https://test.pypi.org/legacy/" >> $GITHUB_ENV
+          echo "PYPI_API_TOKEN=${{ secrets.PYPI_TEST_API_TOKEN }}" >> $GITHUB_ENV
+      - name: Update Deployment Environment To Release
+        if: ${{ github.ref == 'refs/tags/release-candidate' }}
+        run: |
+          echo "PYPI_INDEX_URL=https://upload.pypi.org/legacy/" >> $GITHUB_ENV
+          echo "PYPI_API_TOKEN=${{ secrets.PYPI_API_TOKEN }}" >> $GITHUB_ENV
+      - name: Publish PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ env.PYPI_API_TOKEN }}
+          repository_url: ${{ env.PYPI_INDEX_URL }}
+          skip_existing: ${{ env.PYPI_INDEX_URL == 'https://test.pypi.org/legacy/' }}
