@@ -66,8 +66,13 @@ jobs:
         run: |
           pytest
       - name: Run Integration Tests
+        shell: python
         run: |
-          python -c "import scriptenv; scriptenv.requires('requests==2.25.1'); import requests; assert requests.__version__ == '2.25.1'"
+          import scriptenv
+
+          scriptenv.requires('requests==2.25.1')
+          import requests
+          assert requests.__version__ == '2.25.1'
   release:
     runs-on: ubuntu-20.04
     needs: [test]
