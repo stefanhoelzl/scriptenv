@@ -7,6 +7,7 @@ from uuid import uuid4 as uuid
 
 import pytest
 from _pytest.fixtures import FixtureRequest
+from _pytest.monkeypatch import MonkeyPatch
 from pytest_git import GitRepo
 
 from release import changelog, check_commit_messages, version
@@ -28,6 +29,11 @@ def in_git_repo(
 def setup_git_repo(in_git_repo: GitRepo) -> None:
     in_git_repo.run("git config user.name pytest")
     in_git_repo.run("git config user.email pytest@example.com")
+
+
+@pytest.fixture(autouse=True)
+def clean_environment(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.delenv("GITHUB_REF", raising=False)
 
 
 @pytest.fixture
@@ -138,9 +144,17 @@ def test_changelog_since_last_version_by_default(
 
 
 def test_version_initial(commit_factory: CommitFactory) -> None:
-    commit_hashes = commit_factory(["[feature] first", "[feature] second"])
+    commit_hashes = commit_factory(["[feature] first"])
     last_commit_hash_short = commit_hashes[-1][:7]
     assert version() == f"0.1.0.{last_commit_hash_short}"
+
+
+def test_version_next_release(
+    commit_factory: CommitFactory, tag_factory: TagFactory, monkeypatch: MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GITHUB_REF", "refs/tags/release-candidate")
+    commit_factory(["[feature] first"])
+    assert version() == "0.1.0"
 
 
 def test_version_next_minor(

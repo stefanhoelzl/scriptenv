@@ -1,6 +1,7 @@
 """
 Everything needed to create new releases.
 """
+import os
 import re
 import subprocess
 import sys
@@ -51,7 +52,11 @@ def version() -> str:
         "minor" if "feature" in commit_categories else "patch"
     )
     current_commit_hash = _git("log", "--pretty=%h", "--max-count=1")
-    dev_version_postfix = f".{current_commit_hash}"
+    dev_version_postfix = (
+        f".{current_commit_hash}"
+        if os.environ.get("GITHUB_REF") != "refs/tags/release-candidate"
+        else ""
+    )
     return f"{new_version}{dev_version_postfix}"
 
 
