@@ -23,6 +23,12 @@ CommitMessageRegex = re.compile(
 )
 
 
+def release_canidate() -> None:
+    """Sets the release-candidate tag and pushes it to master to trigger a new release."""
+    print(_git("tag", "--force", "release-candidate"))
+    print(_git("push", "origin", "release-candidate"))
+
+
 def check_commit_messages() -> Generator[str, None, None]:
     """Checks if the all commit messages in the log are valid."""
     invalid_messages = [
