@@ -118,19 +118,11 @@ jobs:
           gh release create v`python release.py version` ./dist/*.whl -F changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set Default Deployment Environment
-        run: |
-          echo "PYPI_INDEX_URL=https://test.pypi.org/legacy/" >> $GITHUB_ENV
-          echo "PYPI_API_TOKEN=${{ secrets.PYPI_TEST_API_TOKEN }}" >> $GITHUB_ENV
-      - name: Update Deployment Environment To Release
-        if: ${{ github.ref == 'refs/tags/release-candidate' }}
-        run: |
-          echo "PYPI_INDEX_URL=https://upload.pypi.org/legacy/" >> $GITHUB_ENV
-          echo "PYPI_API_TOKEN=${{ secrets.PYPI_API_TOKEN }}" >> $GITHUB_ENV
       - name: Publish PyPI
+        if: ${{ github.ref == 'refs/tags/release-candidate' }}
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
-          password: ${{ env.PYPI_API_TOKEN }}
-          repository_url: ${{ env.PYPI_INDEX_URL }}
-          skip_existing: ${{ env.PYPI_INDEX_URL == 'https://test.pypi.org/legacy/' }}
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          repository_url: https://upload.pypi.org/legacy/
+          skip_existing: false
