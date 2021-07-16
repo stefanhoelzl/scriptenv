@@ -8,3 +8,4 @@ build
 dist
 changelog.md
 scriptenv/metadata.py
+install

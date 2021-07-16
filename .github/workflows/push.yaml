@@ -61,7 +61,7 @@ jobs:
           pip install -r dev-requirements.txt
       - name: Install Scriptenv
         run: |
-          pip install -e .
+          pip install --use-feature=in-tree-build --editable .
       - name: Run Unit Tests
         run: |
           pytest
