@@ -99,18 +99,18 @@ jobs:
       - name: Generate Changelog
         run: |
           python release.py changelog > changelog.md
-      - name: Delete Previous Latest Github Release
+      - name: Delete Previous Master Github Release
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
-          tag_name: latest
+          tag_name: master
           delete_release: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish Latest Github Release
+      - name: Publish Master Github Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          gh release create latest ./dist/*.whl -F changelog.md
+          gh release create master ./dist/*.whl -F changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish Github Release
