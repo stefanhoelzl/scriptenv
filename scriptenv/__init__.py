@@ -10,10 +10,6 @@ from pathlib import Path
 import appdirs
 from pip._internal.commands import create_command
 
-from scriptenv import metadata
-
-__author__ = metadata.Author
-
 
 def requires(*requirements: str) -> None:
     """Makes each requirements available to import.
@@ -24,10 +20,10 @@ def requires(*requirements: str) -> None:
     Arguments:
         requirements: List of pip requirements required to be installed.
     """
-    base_path = Path(appdirs.user_cache_dir(__name__, __author__))
-    download_path = (base_path / "download").absolute()
-    install_path = (base_path / "install").absolute()
-    dependencies_path = (base_path / "dependencies").absolute()
+    base_path = Path(appdirs.user_cache_dir(__name__)).absolute()
+    download_path = base_path / "download"
+    install_path = base_path / "install"
+    dependencies_path = base_path / "dependencies"
     dependencies_path.mkdir(parents=True, exist_ok=True)
 
     requirements_hash = hashlib.md5(

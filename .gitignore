@@ -7,5 +7,3 @@ scriptenv.egg-info
 build
 dist
 changelog.md
-scriptenv/metadata.py
-install
