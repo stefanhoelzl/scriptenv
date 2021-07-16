@@ -100,6 +100,7 @@ jobs:
         run: |
           python release.py changelog > changelog.md
       - name: Delete Previous Latest Github Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
           tag_name: latest
