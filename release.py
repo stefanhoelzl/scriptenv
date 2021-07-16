@@ -59,7 +59,7 @@ def version() -> str:
     )
     current_commit_hash = _git("log", "--pretty=%h", "--max-count=1")
     dev_version_postfix = (
-        f".{current_commit_hash}"
+        f"+{current_commit_hash}"
         if os.environ.get("GITHUB_REF") != "refs/tags/release-candidate"
         else ""
     )

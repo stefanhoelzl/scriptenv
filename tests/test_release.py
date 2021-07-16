@@ -146,7 +146,7 @@ def test_changelog_since_last_version_by_default(
 def test_version_initial(commit_factory: CommitFactory) -> None:
     commit_hashes = commit_factory(["[feature] first"])
     last_commit_hash_short = commit_hashes[-1][:7]
-    assert version() == f"0.1.0.{last_commit_hash_short}"
+    assert version() == f"0.1.0+{last_commit_hash_short}"
 
 
 def test_version_next_release(
@@ -162,7 +162,7 @@ def test_version_next_minor(
 ) -> None:
     commit_hashes = commit_factory(["[feature] initial", "[feature] next"])
     tag_factory({"v0.1.0": commit_hashes[0]})
-    assert version() == f"0.2.0.{commit_hashes[-1][:7]}"
+    assert version() == f"0.2.0+{commit_hashes[-1][:7]}"
 
 
 def test_version_next_patch(
@@ -170,4 +170,4 @@ def test_version_next_patch(
 ) -> None:
     commit_hashes = commit_factory(["[feature] initial", "[bugfix] next"])
     tag_factory({"v0.1.0": commit_hashes[0]})
-    assert version() == f"0.1.1.{commit_hashes[-1][:7]}"
+    assert version() == f"0.1.1+{commit_hashes[-1][:7]}"
