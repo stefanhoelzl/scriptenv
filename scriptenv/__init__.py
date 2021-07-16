@@ -13,7 +13,6 @@ from pip._internal.commands import create_command
 from scriptenv import metadata
 
 __author__ = metadata.Author
-__version__ = metadata.Version
 
 
 def requires(*requirements: str) -> None:
@@ -25,7 +24,7 @@ def requires(*requirements: str) -> None:
     Arguments:
         requirements: List of pip requirements required to be installed.
     """
-    base_path = Path(appdirs.user_cache_dir(__name__, __author__, version=__version__))
+    base_path = Path(appdirs.user_cache_dir(__name__, __author__))
     download_path = (base_path / "download").absolute()
     install_path = (base_path / "install").absolute()
     dependencies_path = (base_path / "dependencies").absolute()

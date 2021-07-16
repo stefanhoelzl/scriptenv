@@ -101,11 +101,7 @@ def test_cache_dependency_list(mockpi: MockPI) -> None:
 
 
 def test_use_cache_dir(default_pkg: str) -> None:
-    cache_path = Path(
-        appdirs.user_cache_dir(
-            scriptenv.__name__, scriptenv.__author__, version=scriptenv.__version__
-        )
-    )
+    cache_path = Path(appdirs.user_cache_dir(scriptenv.__name__, scriptenv.__author__))
     download_path = cache_path / "download"
     install_path = cache_path / "install"
 
