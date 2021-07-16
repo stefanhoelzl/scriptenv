@@ -24,7 +24,7 @@ Path(ProjectName, "metadata.py").write_text(
 setup(
     name=ProjectName,
     version=Version,
-    description="define virtual environments within your scripts",
+    description="define virtual environments within your code",
     long_description=Path("README.md").read_text(),
     long_description_content_type="text/markdown",
     classifiers=[

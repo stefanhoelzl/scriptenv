@@ -5,7 +5,7 @@
 [![Downloads](https://img.shields.io/pypi/dm/scriptenv?color=blue&logo=pypi&logoColor=yellow)](https://pypistats.org/packages/scriptenv)
 [![License](https://img.shields.io/pypi/l/scriptenv.svg)](LICENSE)
 
-State requirements inside your python code and `scriptenv` makes ready to import.
+Define requirements inside your python code and `scriptenv` makes them ready to import.
 
 ## Getting Started
 Install `scriptenv`
