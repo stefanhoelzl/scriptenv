@@ -24,7 +24,9 @@ def pytest_configure(config: Config) -> None:
 
     config.option.mypy = True
     config.option.mypy_ignore_missing_imports = True
-    config.pluginmanager.getplugin("mypy").mypy_argv.extend(["--strict"])
+    config.pluginmanager.getplugin("mypy").mypy_argv.extend(
+        ["--strict", "--implicit-reexport"]
+    )
 
     config.option.mccabe = True
     config.addinivalue_line("mccabe-complexity", "5")
