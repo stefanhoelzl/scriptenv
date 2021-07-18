@@ -4,11 +4,11 @@ from typing import Generator
 
 import appdirs
 import pytest
-from mockpi import MockPI
+from mockpi import MockPI, Package
 
 import scriptenv
 
-DefaultPackageName = "scriptenvtestpackage"
+DefaultPackage = Package()
 
 
 @pytest.fixture
@@ -17,104 +17,105 @@ def mockpi(tmp_path: Path) -> MockPI:
 
 
 @pytest.fixture
-def default_pkg(mockpi: MockPI) -> Generator[str, None, None]:
-    mockpi.add(DefaultPackageName)
+def default_pkg(mockpi: MockPI) -> Generator[Package, None, None]:
+    mockpi.add(DefaultPackage)
     with mockpi.server():
-        yield DefaultPackageName
+        yield DefaultPackage
 
 
-def test_install_package(default_pkg: str) -> None:
-    scriptenv.requires(default_pkg)
+def test_install_package(default_pkg: Package) -> None:
+    scriptenv.requires(default_pkg.name)
 
-    __import__(default_pkg)
+    __import__(default_pkg.name)
 
 
 def test_install_multiple_packages(mockpi: MockPI) -> None:
-    another_package = DefaultPackageName + "another"
-    mockpi.add(DefaultPackageName)
+    another_package = Package(name="another")
+    mockpi.add(DefaultPackage)
     mockpi.add(another_package)
 
     with mockpi.server():
-        scriptenv.requires(DefaultPackageName, another_package)
+        scriptenv.requires(DefaultPackage.name, another_package.name)
 
-    __import__(DefaultPackageName)
-    __import__(another_package)
+    __import__(DefaultPackage.name)
+    __import__(another_package.name)
 
 
 def test_install_specific_version(mockpi: MockPI) -> None:
-    wanted_version = "0.1.0"
-    mockpi.add(DefaultPackageName, version=wanted_version)
-    mockpi.add(DefaultPackageName, version="0.2.0")
+    wanted = Package(version="0.1.0")
+    mockpi.add(wanted)
+    mockpi.add(Package(version="0.2.0"))
 
     with mockpi.server():
-        scriptenv.requires(f"{DefaultPackageName}=={wanted_version}")
+        scriptenv.requires(f"{wanted.name}=={wanted.version}")
 
-    assert __import__(DefaultPackageName).__version__ == wanted_version
+    assert __import__(wanted.name).__version__ == wanted.version
 
 
 def test_install_dependencies(mockpi: MockPI) -> None:
-    dependency = DefaultPackageName + "dependency"
+    dependency = Package("dependency")
+    package = Package(dependencies=[dependency])
     mockpi.add(dependency)
-    mockpi.add(DefaultPackageName, dependencies=[dependency])
+    mockpi.add(package)
 
     with mockpi.server():
-        scriptenv.requires(DefaultPackageName)
+        scriptenv.requires(package.name)
 
-    __import__(dependency)
+    __import__(dependency.name)
 
 
-def test_supported_package_types(mockpi: MockPI) -> None:
-    packages = dict(tarpackage="sdist", wheelpackage="bdist_wheel")
-    for name, dist_type in packages.items():
-        mockpi.add(name, dist_type=dist_type)
+@pytest.mark.parametrize("dist_type", ["sdist", "bdist_wheel"])
+def test_supported_package_types(mockpi: MockPI, dist_type: str) -> None:
+    package = Package(dist_type=dist_type)
+    mockpi.add(package)
 
     with mockpi.server():
-        scriptenv.requires(*packages)
+        scriptenv.requires(package.name)
 
-    for package in packages:
-        __import__(package)
+    __import__(package.name)
 
 
 def test_cache_packages(mockpi: MockPI) -> None:
-    version = "0.1.0"
-    another_package = DefaultPackageName + "another"
-    mockpi.add(DefaultPackageName, version=version)
-    mockpi.add(another_package, dependencies=[DefaultPackageName])
+    cached_package = Package(version="0.1.0")
+    another_package = Package(name="another", dependencies=[cached_package])
+    mockpi.add(cached_package)
+    mockpi.add(another_package)
 
     with mockpi.server():
-        scriptenv.requires(DefaultPackageName)
-        scriptenv.requires(another_package)
+        scriptenv.requires(cached_package.name)
+        scriptenv.requires(another_package.name)
 
-    assert mockpi.count_package_requests(DefaultPackageName, version) == 1
+    assert mockpi.count_package_requests(cached_package) == 1
 
 
 def test_cache_dependency_list(mockpi: MockPI) -> None:
-    version = "0.1.0"
-    mockpi.add(DefaultPackageName, version=version)
+    mockpi.add(DefaultPackage)
 
     with mockpi.server():
-        scriptenv.requires(DefaultPackageName)
+        scriptenv.requires(DefaultPackage.name)
         mockpi.reset_requests()
-        scriptenv.requires(DefaultPackageName)
+        scriptenv.requires(DefaultPackage.name)
 
     assert mockpi.count_requests() == 0
 
 
-def test_use_cache_dir(default_pkg: str) -> None:
+def test_use_cache_dir(default_pkg: Package) -> None:
     cache_path = Path(appdirs.user_cache_dir(scriptenv.__name__))
     download_path = cache_path / "download"
     install_path = cache_path / "install"
 
     assert not cache_path.exists()
 
-    scriptenv.requires(default_pkg)
+    scriptenv.requires(default_pkg.name)
 
     assert len(list(download_path.iterdir())) == 1
     assert len(list(install_path.iterdir())) == 1
 
 
-def test_suppess_stdout(default_pkg: str, capsys: pytest.CaptureFixture[str]) -> None:
-    scriptenv.requires(default_pkg)
+def test_suppess_stdout(
+    default_pkg: Package, capsys: pytest.CaptureFixture[str]
+) -> None:
+    scriptenv.requires(default_pkg.name)
 
     out, _ = capsys.readouterr()
     assert not out

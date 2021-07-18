@@ -7,25 +7,41 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
-from typing import Generator, List, Optional
+from typing import Generator, List, NamedTuple
 from unittest.mock import patch
 
 from setuptools import sandbox
 
-SetupPyTemplate = """
+
+class Package(NamedTuple):
+    """MockPI Package definition"""
+
+    name: str = "scriptenvtestpackage"
+    version: str = "0.1.0"
+    # recursive types not yet supported in mypy (https://github.com/python/mypy/issues/731)
+    dependencies: List["Package"] = list()  # type: ignore
+    dist_type: str = "sdist"
+    body: str = ""
+
+    def generate_setup_py(self) -> str:
+        """Generates the content for setup.py."""
+        return f"""
 from setuptools import setup
 
 setup(
-    name="{package}",
-    version="{version}",
-    py_modules=["{package}"],
-    install_requires={install_requires},
+    name="{self.name}",
+    version="{self.version}",
+    py_modules=["{self.name}"],
+    install_requires={[pkg.name for pkg in self.dependencies]},
 )
 """
 
-PackagePyTemplate = """
-__version__ = '{version}'
+    def generate_module(self) -> str:
+        """Generates the content for the python module."""
+        return f"""
+__version__ = '{self.version}'
 __mock__ = True
+{self.body}
 """
 
 
@@ -69,32 +85,20 @@ class MockPI:
         self._build_path = path / "build"
         self._requests: List[str] = list()
 
-    def add(
-        self,
-        pkg: str,
-        version: str = "0.0.1",
-        dependencies: Optional[List[str]] = None,
-        dist_type: str = "sdist",
-    ) -> None:
+    def add(self, pkg: Package) -> None:
         """Adds a dummy package to the pypi server"""
-        package_path = self._build_path / f"{pkg}_{version}"
+        package_path = self._build_path / f"{pkg.name}_{pkg.version}"
         package_path.mkdir(parents=True)
 
         setup_py = package_path / "setup.py"
-        setup_py.write_text(
-            SetupPyTemplate.format(
-                package=pkg, version=version, install_requires=str(dependencies)
-            )
-        )
-        (package_path / f"{pkg}.py").write_text(
-            PackagePyTemplate.format(version=version)
-        )
+        setup_py.write_text(pkg.generate_setup_py())
+        (package_path / f"{pkg.name}.py").write_text(pkg.generate_module())
 
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-            sandbox.run_setup(str(setup_py.absolute()), [dist_type])
+            sandbox.run_setup(str(setup_py.absolute()), [pkg.dist_type])
 
         dist_path = next((package_path / "dist").iterdir())
-        serve_path = self._serve_path / pkg
+        serve_path = self._serve_path / pkg.name
         serve_path.mkdir(parents=True, exist_ok=True)
         (serve_path / dist_path.name).write_bytes(dist_path.read_bytes())
 
@@ -115,6 +119,8 @@ class MockPI:
         """Returns the number of requests made in total."""
         return len(self._requests)
 
-    def count_package_requests(self, package: str, version: str) -> int:
+    def count_package_requests(self, package: Package) -> int:
         """Returns the number of requests made for a specific package version."""
-        return self._requests.count(f"/{package}/{package}-{version}.tar.gz")
+        return self._requests.count(
+            f"/{package.name}/{package.name}-{package.version}.tar.gz"
+        )
