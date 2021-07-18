@@ -52,11 +52,13 @@ def _serve_directory(path: Path, requests: List[str]) -> Generator[str, None, No
     with ThreadingHTTPServer(
         (host, port), partial(SilentHTTPRequestHandler, directory=path.absolute())
     ) as httpd:
-        thread = Thread(target=httpd.serve_forever)
+        thread = Thread(target=httpd.serve_forever, daemon=True)
         thread.start()
-        yield f"http://{host}:{port}"
-        httpd.shutdown()
-        thread.join(1)
+        try:
+            yield f"http://{host}:{port}"
+        finally:
+            httpd.shutdown()
+            thread.join(1)
 
 
 class MockPI:
