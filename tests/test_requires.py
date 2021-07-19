@@ -12,15 +12,16 @@ DefaultPackage = Package()
 
 
 @pytest.fixture
-def mockpi(tmp_path: Path) -> MockPI:
-    return MockPI(tmp_path / "mockpi")
+def mockpi(tmp_path: Path) -> Generator[MockPI, None, None]:
+    mockpi = MockPI(tmp_path / "mockpi")
+    with mockpi.server():
+        yield mockpi
 
 
 @pytest.fixture
 def default_pkg(mockpi: MockPI) -> Generator[Package, None, None]:
     mockpi.add(DefaultPackage)
-    with mockpi.server():
-        yield DefaultPackage
+    yield DefaultPackage
 
 
 def test_install_package(default_pkg: Package) -> None:
@@ -34,8 +35,7 @@ def test_install_multiple_packages(mockpi: MockPI) -> None:
     mockpi.add(DefaultPackage)
     mockpi.add(another_package)
 
-    with mockpi.server():
-        scriptenv.requires(DefaultPackage.name, another_package.name)
+    scriptenv.requires(DefaultPackage.name, another_package.name)
 
     __import__(DefaultPackage.name)
     __import__(another_package.name)
@@ -46,8 +46,7 @@ def test_install_specific_version(mockpi: MockPI) -> None:
     mockpi.add(wanted)
     mockpi.add(Package(version="0.2.0"))
 
-    with mockpi.server():
-        scriptenv.requires(f"{wanted.name}=={wanted.version}")
+    scriptenv.requires(f"{wanted.name}=={wanted.version}")
 
     assert __import__(wanted.name).__version__ == wanted.version
 
@@ -58,8 +57,7 @@ def test_install_dependencies(mockpi: MockPI) -> None:
     mockpi.add(dependency)
     mockpi.add(package)
 
-    with mockpi.server():
-        scriptenv.requires(package.name)
+    scriptenv.requires(package.name)
 
     __import__(dependency.name)
 
@@ -69,8 +67,7 @@ def test_supported_package_types(mockpi: MockPI, dist_type: str) -> None:
     package = Package(dist_type=dist_type)
     mockpi.add(package)
 
-    with mockpi.server():
-        scriptenv.requires(package.name)
+    scriptenv.requires(package.name)
 
     __import__(package.name)
 
@@ -81,9 +78,8 @@ def test_cache_packages(mockpi: MockPI) -> None:
     mockpi.add(cached_package)
     mockpi.add(another_package)
 
-    with mockpi.server():
-        scriptenv.requires(cached_package.name)
-        scriptenv.requires(another_package.name)
+    scriptenv.requires(cached_package.name)
+    scriptenv.requires(another_package.name)
 
     assert mockpi.count_package_requests(cached_package) == 1
 
@@ -91,10 +87,9 @@ def test_cache_packages(mockpi: MockPI) -> None:
 def test_cache_dependency_list(mockpi: MockPI) -> None:
     mockpi.add(DefaultPackage)
 
-    with mockpi.server():
-        scriptenv.requires(DefaultPackage.name)
-        mockpi.reset_requests()
-        scriptenv.requires(DefaultPackage.name)
+    scriptenv.requires(DefaultPackage.name)
+    mockpi.reset_requests()
+    scriptenv.requires(DefaultPackage.name)
 
     assert mockpi.count_requests() == 0
 
@@ -125,8 +120,7 @@ def test_package_contains_invalid_python_file(mockpi: MockPI) -> None:
     package = Package(dist_type="bdist_wheel", body="invalid syntax")
     mockpi.add(package)
 
-    with mockpi.server():
-        scriptenv.requires(package.name)
+    scriptenv.requires(package.name)
 
     with pytest.raises(SyntaxError):
         __import__(package.name)
