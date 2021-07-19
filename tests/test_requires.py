@@ -119,3 +119,14 @@ def test_suppess_stdout(
 
     out, _ = capsys.readouterr()
     assert not out
+
+
+def test_package_contains_invalid_python_file(mockpi: MockPI) -> None:
+    package = Package(dist_type="bdist_wheel", body="invalid syntax")
+    mockpi.add(package)
+
+    with mockpi.server():
+        scriptenv.requires(package.name)
+
+    with pytest.raises(SyntaxError):
+        __import__(package.name)

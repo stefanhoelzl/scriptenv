@@ -4,8 +4,9 @@ import io
 import json
 import re
 import sys
-from contextlib import redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
+from typing import Callable, Generator
 
 import appdirs
 from pip._internal.commands import create_command
@@ -58,7 +59,19 @@ def requires(*requirements: str) -> None:
 
 
 def _pip(command: str, *args: str) -> str:
-    stdout = io.StringIO()
-    with redirect_stdout(stdout):
+    with _redirect_stdout() as get_stdout:
         create_command(command).main(list(args))
-    return stdout.getvalue()
+    return get_stdout()
+
+
+@contextmanager
+def _redirect_stdout() -> Generator[Callable[[], str], None, None]:
+    """Redirects stdout with a workaround for https://bugs.python.org/issue44666"""
+    stdout = io.BytesIO()
+    encoding = sys.stdout.encoding
+    wrapper = io.TextIOWrapper(
+        stdout,
+        encoding=encoding,
+    )
+    with redirect_stdout(wrapper):
+        yield lambda: stdout.getvalue().decode(encoding)
