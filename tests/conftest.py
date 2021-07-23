@@ -7,6 +7,7 @@ from unittest.mock import patch
 import appdirs
 import pytest
 from _pytest.config import Config
+from mockpi import MockPI
 from pytest_cov.plugin import CovPlugin
 
 
@@ -15,7 +16,6 @@ def pytest_configure(config: Config) -> None:
     """Setup default pytest options."""
     config.option.newfirst = True
     config.option.failedfirst = True
-    config.option.capture = "no"
     config.option.tbstyle = "short"
 
     config.option.pylint = True
@@ -61,3 +61,11 @@ def cleanup_sys_modules() -> None:
     for name, module in list(sys.modules.items()):
         if getattr(module, "__mock__", False):
             del sys.modules[name]
+
+
+@pytest.fixture
+def mockpi(tmp_path: Path) -> Generator[MockPI, None, None]:
+    """Fixture to setup a Python Package Index"""
+    mock_pi = MockPI(tmp_path / "mockpi")
+    with mock_pi.server():
+        yield mock_pi

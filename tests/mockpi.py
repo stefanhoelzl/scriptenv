@@ -3,6 +3,7 @@
 import io
 import os
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from enum import Enum
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -13,6 +14,13 @@ from unittest.mock import patch
 from setuptools import sandbox
 
 
+class DistType(Enum):
+    """Enumerates all supported distribution types"""
+
+    TAR = "sdist"
+    WHEEL = "bdist_wheel"
+
+
 class Package(NamedTuple):
     """MockPI Package definition"""
 
@@ -20,10 +28,24 @@ class Package(NamedTuple):
     version: str = "0.1.0"
     # recursive types not yet supported in mypy (https://github.com/python/mypy/issues/731)
     dependencies: List["Package"] = list()  # type: ignore
-    dist_type: str = "sdist"
+    dist_type: DistType = DistType.TAR
     body: str = ""
 
-    def generate_setup_py(self) -> str:
+    def build(self, build_path: Path) -> Path:
+        """Builds a package and returns the dist path."""
+        package_path = build_path / f"{self.name}_{self.version}"
+        package_path.mkdir(parents=True)
+
+        setup_py = package_path / "setup.py"
+        setup_py.write_text(self._generate_setup_py())
+        (package_path / f"{self.name}.py").write_text(self._generate_module())
+
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            sandbox.run_setup(str(setup_py.absolute()), [self.dist_type.value])
+
+        return next((package_path / "dist").iterdir())
+
+    def _generate_setup_py(self) -> str:
         """Generates the content for setup.py."""
         return f"""
 from setuptools import setup
@@ -36,7 +58,7 @@ setup(
 )
 """
 
-    def generate_module(self) -> str:
+    def _generate_module(self) -> str:
         """Generates the content for the python module."""
         return f"""
 __version__ = '{self.version}'
@@ -87,19 +109,9 @@ class MockPI:
 
     def add(self, pkg: Package) -> None:
         """Adds a dummy package to the pypi server"""
-        package_path = self._build_path / f"{pkg.name}_{pkg.version}"
-        package_path.mkdir(parents=True)
-
-        setup_py = package_path / "setup.py"
-        setup_py.write_text(pkg.generate_setup_py())
-        (package_path / f"{pkg.name}.py").write_text(pkg.generate_module())
-
-        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-            sandbox.run_setup(str(setup_py.absolute()), [pkg.dist_type])
-
-        dist_path = next((package_path / "dist").iterdir())
         serve_path = self._serve_path / pkg.name
         serve_path.mkdir(parents=True, exist_ok=True)
+        dist_path = pkg.build(self._build_path)
         (serve_path / dist_path.name).write_bytes(dist_path.read_bytes())
 
     @contextmanager

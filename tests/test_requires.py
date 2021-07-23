@@ -4,18 +4,11 @@ from typing import Generator
 
 import appdirs
 import pytest
-from mockpi import MockPI, Package
+from mockpi import DistType, MockPI, Package
 
 import scriptenv
 
 DefaultPackage = Package()
-
-
-@pytest.fixture
-def mockpi(tmp_path: Path) -> Generator[MockPI, None, None]:
-    mockpi = MockPI(tmp_path / "mockpi")
-    with mockpi.server():
-        yield mockpi
 
 
 @pytest.fixture
@@ -62,8 +55,8 @@ def test_install_dependencies(mockpi: MockPI) -> None:
     __import__(dependency.name)
 
 
-@pytest.mark.parametrize("dist_type", ["sdist", "bdist_wheel"])
-def test_supported_package_types(mockpi: MockPI, dist_type: str) -> None:
+@pytest.mark.parametrize("dist_type", list(DistType))
+def test_supported_package_types(mockpi: MockPI, dist_type: DistType) -> None:
     package = Package(dist_type=dist_type)
     mockpi.add(package)
 
@@ -105,22 +98,3 @@ def test_use_cache_dir(default_pkg: Package) -> None:
 
     assert len(list(download_path.iterdir())) == 1
     assert len(list(install_path.iterdir())) == 1
-
-
-def test_suppess_stdout(
-    default_pkg: Package, capsys: pytest.CaptureFixture[str]
-) -> None:
-    scriptenv.requires(default_pkg.name)
-
-    out, _ = capsys.readouterr()
-    assert not out
-
-
-def test_package_contains_invalid_python_file(mockpi: MockPI) -> None:
-    package = Package(dist_type="bdist_wheel", body="invalid syntax")
-    mockpi.add(package)
-
-    scriptenv.requires(package.name)
-
-    with pytest.raises(SyntaxError):
-        __import__(package.name)
