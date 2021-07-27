@@ -9,6 +9,7 @@ import pytest
 from _pytest.config import Config
 from mockpi import MockPI
 from pytest_cov.plugin import CovPlugin
+from pytest_mock import MockerFixture
 
 
 @pytest.mark.tryfirst
@@ -48,11 +49,9 @@ def patch_cache_path(tmp_path: Path) -> Generator[None, None, None]:
 
 
 @pytest.fixture(autouse=True, scope="function")
-def save_and_restore_sys_path() -> Generator[None, None, None]:
+def save_and_restore_sys_path(mocker: MockerFixture) -> None:
     """Saves and restores sys.path."""
-    sys_path_backup = list(sys.path)
-    yield
-    sys.path = sys_path_backup
+    mocker.patch("sys.path", list(sys.path))
 
 
 @pytest.fixture(autouse=True, scope="function")
