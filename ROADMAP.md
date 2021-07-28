@@ -6,3 +6,6 @@
   * enable/disable pip stdout/stderr
   * enable/disable caching
   * customize cache directories
+* Internal
+  * remove dependency from appdirs
+  * logging
