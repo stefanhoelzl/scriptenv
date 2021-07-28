@@ -56,8 +56,9 @@ class ScriptEnv:
         """
         Updates the current runtime to make the packages available.
 
-        sys.path gets updated so will imports work.
-        PYTHONPATH gets updated so imports will work in subprocesses.
+        sys.path gets updated to support imports.
+        PYTHONPATH gets updated to support imports in subprocesses.
+        PATH gets updated to support entry points called from subprocesses.
         """
 
         def extend_environ_path(name: str, items: List[str]) -> None:
@@ -69,4 +70,7 @@ class ScriptEnv:
         sys.path[0:0] = [str(self.install_path / pkg) for pkg in packages]
         extend_environ_path(
             "PYTHONPATH", [str(self.install_path / pkg) for pkg in packages]
+        )
+        extend_environ_path(
+            "PATH", [str(self.install_path / pkg / "bin") for pkg in packages]
         )

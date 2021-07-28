@@ -98,6 +98,13 @@ def test_update_runtime(tmp_path: Path, mocker: MockerFixture) -> None:
             "existing_pythonpath",
         ]
     )
+    assert os.environ["PATH"] == os.pathsep.join(
+        [
+            str(tmp_path / "install" / "pkg0" / "bin"),
+            str(tmp_path / "install" / "pkg1" / "bin"),
+            "existing_path",
+        ]
+    )
 
 
 def test_update_empty_runtime(tmp_path: Path, mocker: MockerFixture) -> None:
@@ -115,5 +122,11 @@ def test_update_empty_runtime(tmp_path: Path, mocker: MockerFixture) -> None:
         [
             str(tmp_path / "install" / "pkg0"),
             str(tmp_path / "install" / "pkg1"),
+        ]
+    )
+    assert os.environ["PATH"] == os.pathsep.join(
+        [
+            str(tmp_path / "install" / "pkg0" / "bin"),
+            str(tmp_path / "install" / "pkg1" / "bin"),
         ]
     )

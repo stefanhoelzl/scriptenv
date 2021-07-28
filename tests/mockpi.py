@@ -55,6 +55,9 @@ setup(
     version="{self.version}",
     py_modules=["{self.name}"],
     install_requires={[pkg.name for pkg in self.dependencies]},
+    entry_points={{
+        'console_scripts': ['{self.name}={self.name}:main']
+    }},
 )
 """
 
@@ -63,6 +66,10 @@ setup(
         return f"""
 __version__ = '{self.version}'
 __mock__ = True
+
+def main():
+    pass
+
 {self.body}
 """
 

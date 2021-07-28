@@ -27,15 +27,15 @@ def test_install_package(default_pkg: Package) -> None:
 
 def test_forward_to_subprocess(default_pkg: Package) -> None:
     scriptenv.requires(default_pkg.name)
-
     subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            f"import {default_pkg.name}",
-        ],
+        [sys.executable, "-c", f"import {default_pkg.name}"],
         check=True,
     )
+
+
+def test_forward_binaries_to_subprocesses(default_pkg: Package) -> None:
+    scriptenv.requires(default_pkg.name)
+    subprocess.run([default_pkg.name], check=True)
 
 
 def test_use_cache_dir(default_pkg: Package) -> None:
