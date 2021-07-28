@@ -65,7 +65,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           pytest
-      - name: Run Integration Tests
+      - name: Run Smoke Test
         shell: python
         run: |
           import scriptenv

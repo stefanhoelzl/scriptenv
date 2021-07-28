@@ -120,9 +120,15 @@ def _formatted_commits_by_category(
 ) -> Generator[str, None, None]:
     for category, keyword in CategoryKeywords.items():
         if category in ChangelogCategories and len(commits_by_category[keyword]) > 0:
-            yield f"* {category}"
-            for message in commits_by_category[keyword]:
-                yield f"  * {message}"
+            yield from _formatted_category(category, commits_by_category[keyword])
+
+
+def _formatted_category(
+    category: str, commits: List[str]
+) -> Generator[str, None, None]:
+    yield f"* {category}"
+    for message in commits:
+        yield f"  * {message}"
 
 
 if __name__ == "__main__":
