@@ -47,6 +47,8 @@ def patch_cache_path(tmp_path: Path) -> Generator[None, None, None]:
     """Patches appdirs to use a temporary directory"""
     with patch.object(appdirs, "user_cache_dir", return_value=tmp_path / "cache"):
         yield
+    if Path(appdirs.user_cache_dir("scriptenv")).exists():
+        raise RuntimeError("Test was not using patched appdirs.user_cache_dir")
 
 
 @pytest.fixture(autouse=True, scope="function")
