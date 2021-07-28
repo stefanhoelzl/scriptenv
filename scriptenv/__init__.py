@@ -1,9 +1,5 @@
 """scriptenv"""
 
-from pathlib import Path
-
-import appdirs
-
 from .scriptenv import ScriptEnv
 
 
@@ -16,7 +12,7 @@ def requires(*requirements: str) -> None:
     Arguments:
         requirements: List of pip requirements required to be installed.
     """
-    env = ScriptEnv(Path(appdirs.user_cache_dir(__name__)))
+    env = ScriptEnv()
     packages = env.fetch_requirements(requirements)
     env.install_packages(packages)
     env.update_runtime(packages)

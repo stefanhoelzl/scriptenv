@@ -5,7 +5,9 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Iterable, List, Optional, Set
+
+import appdirs
 
 from . import pip
 
@@ -13,8 +15,9 @@ from . import pip
 class ScriptEnv:
     """Builds a environment to import packages within a script."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Optional[Path] = None) -> None:
         """Initializes a ScriptEnv with `path` as cache directory."""
+        path = path or Path(appdirs.user_cache_dir(__name__))
         self._path = path.absolute()
         self.locks_path.mkdir(parents=True, exist_ok=True)
 

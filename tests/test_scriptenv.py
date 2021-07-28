@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from unittest.mock import call
 
+import appdirs
 from pytest_mock import MockerFixture
 
 from scriptenv.scriptenv import ScriptEnv
@@ -22,6 +23,15 @@ def test_paths(tmp_path: Path) -> None:
     assert env.package_cache_path == base_path / "cache"
 
     assert env.locks_path.is_dir()
+
+
+def test_default_cache_dir() -> None:
+    env = ScriptEnv()
+
+    cache_path = Path(appdirs.user_cache_dir("scriptenv"))
+    assert env.install_path.parent == cache_path
+    assert env.locks_path.parent == cache_path
+    assert env.package_cache_path.parent == cache_path
 
 
 def test_fetch_requirements_from_cached_file(

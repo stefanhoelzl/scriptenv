@@ -1,10 +1,8 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,disable=redefined-outer-name,unused-argument
 import subprocess
 import sys
-from pathlib import Path
 from typing import Generator
 
-import appdirs
 import pytest
 from mockpi import MockPI, Package
 
@@ -36,18 +34,3 @@ def test_forward_to_subprocess(default_pkg: Package) -> None:
 def test_forward_binaries_to_subprocesses(default_pkg: Package) -> None:
     scriptenv.requires(default_pkg.name)
     subprocess.run([default_pkg.name], check=True)
-
-
-def test_use_cache_dir(default_pkg: Package) -> None:
-    cache_path = Path(appdirs.user_cache_dir("scriptenv"))
-    download_path = cache_path / "cache"
-    install_path = cache_path / "install"
-    locks_path = cache_path / "locks"
-
-    assert not cache_path.exists()
-
-    scriptenv.requires(default_pkg.name)
-
-    assert len(list(download_path.iterdir())) == 1
-    assert len(list(locks_path.iterdir())) == 1
-    assert len(list(install_path.iterdir())) == 1
