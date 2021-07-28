@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 from unittest.mock import call
@@ -90,3 +91,29 @@ def test_update_runtime(tmp_path: Path, mocker: MockerFixture) -> None:
         str(tmp_path / "install" / "pkg1"),
         "existing_path",
     ]
+    assert os.environ["PYTHONPATH"] == os.pathsep.join(
+        [
+            str(tmp_path / "install" / "pkg0"),
+            str(tmp_path / "install" / "pkg1"),
+            "existing_pythonpath",
+        ]
+    )
+
+
+def test_update_empty_runtime(tmp_path: Path, mocker: MockerFixture) -> None:
+    mocker.patch("sys.path", [])
+    mocker.patch("os.environ", dict())
+
+    env = ScriptEnv(tmp_path)
+    env.update_runtime(["pkg0", "pkg1"])
+
+    assert sys.path == [
+        str(tmp_path / "install" / "pkg0"),
+        str(tmp_path / "install" / "pkg1"),
+    ]
+    assert os.environ["PYTHONPATH"] == os.pathsep.join(
+        [
+            str(tmp_path / "install" / "pkg0"),
+            str(tmp_path / "install" / "pkg1"),
+        ]
+    )

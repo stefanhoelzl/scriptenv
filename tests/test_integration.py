@@ -1,4 +1,6 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,disable=redefined-outer-name,unused-argument
+import subprocess
+import sys
 from pathlib import Path
 from typing import Generator
 
@@ -21,6 +23,19 @@ def test_install_package(default_pkg: Package) -> None:
     scriptenv.requires(default_pkg.name)
 
     __import__(default_pkg.name)
+
+
+def test_forward_to_subprocess(default_pkg: Package) -> None:
+    scriptenv.requires(default_pkg.name)
+
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            f"import {default_pkg.name}",
+        ],
+        check=True,
+    )
 
 
 def test_use_cache_dir(default_pkg: Package) -> None:

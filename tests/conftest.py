@@ -1,4 +1,5 @@
 """configures pytest"""
+import os
 import sys
 from pathlib import Path
 from typing import Generator
@@ -52,6 +53,17 @@ def patch_cache_path(tmp_path: Path) -> Generator[None, None, None]:
 def save_and_restore_sys_path(mocker: MockerFixture) -> None:
     """Saves and restores sys.path."""
     mocker.patch("sys.path", list(sys.path))
+
+
+@pytest.fixture(autouse=True, scope="function")
+def save_and_restore_os_environ() -> Generator[None, None, None]:
+    """Saves and restores os.environ."""
+    backup = dict(os.environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(backup)
 
 
 @pytest.fixture(autouse=True, scope="function")

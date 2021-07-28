@@ -2,9 +2,10 @@
 
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
-from typing import Iterable, Set
+from typing import Iterable, List, Set
 
 from . import pip
 
@@ -56,5 +57,16 @@ class ScriptEnv:
         Updates the current runtime to make the packages available.
 
         sys.path gets updated so will imports work.
+        PYTHONPATH gets updated so imports will work in subprocesses.
         """
+
+        def extend_environ_path(name: str, items: List[str]) -> None:
+            existing_items = (
+                os.environ[name].split(os.pathsep) if name in os.environ else list()
+            )
+            os.environ[name] = os.pathsep.join(items + existing_items)
+
         sys.path[0:0] = [str(self.install_path / pkg) for pkg in packages]
+        extend_environ_path(
+            "PYTHONPATH", [str(self.install_path / pkg) for pkg in packages]
+        )
