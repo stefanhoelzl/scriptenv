@@ -140,3 +140,22 @@ def test_update_empty_runtime(tmp_path: Path, mocker: MockerFixture) -> None:
             str(tmp_path / "install" / "pkg1" / "bin"),
         ]
     )
+
+
+def test_apply(mocker: MockerFixture) -> None:
+    env = ScriptEnv()
+
+    requirements = ["requirement"]
+    packages = {"requirement", "dependency"}
+
+    fetch_mock = mocker.patch.object(env, "fetch_requirements")
+    fetch_mock.return_value = packages
+
+    install_mock = mocker.patch.object(env, "install_packages")
+    update_mock = mocker.patch.object(env, "update_runtime")
+
+    env.apply(["requirement"])
+
+    fetch_mock.assert_called_once_with(requirements)
+    install_mock.assert_called_once_with(packages)
+    update_mock.assert_called_once_with(packages)

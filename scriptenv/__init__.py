@@ -13,6 +13,4 @@ def requires(*requirements: str) -> None:
         requirements: List of pip requirements required to be installed.
     """
     env = ScriptEnv()
-    packages = env.fetch_requirements(requirements)
-    env.install_packages(packages)
-    env.update_runtime(packages)
+    env.apply(requirements)

@@ -36,6 +36,12 @@ class ScriptEnv:
         """Paths where the downloaded packages are cached"""
         return self._path / "cache"
 
+    def apply(self, requirements: Iterable[str]) -> None:
+        """Applies requirements to the current runtime."""
+        packages = self.fetch_requirements(requirements)
+        self.install_packages(packages)
+        self.update_runtime(packages)
+
     def fetch_requirements(self, requirements: Iterable[str]) -> Set[str]:
         """Resolves a set of requirements and returns a list of packages."""
         lock = hashlib.md5("\n".join(requirements).encode("utf-8")).hexdigest()
