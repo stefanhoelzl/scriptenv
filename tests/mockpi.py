@@ -8,7 +8,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
-from typing import Generator, List, NamedTuple
+from typing import Generator, Iterable, Mapping, NamedTuple
 from unittest.mock import patch
 
 from setuptools import sandbox
@@ -27,9 +27,10 @@ class Package(NamedTuple):
     name: str = "scriptenvtestpackage"
     version: str = "0.1.0"
     # recursive types not yet supported in mypy (https://github.com/python/mypy/issues/731)
-    dependencies: List["Package"] = list()  # type: ignore
+    dependencies: Iterable["Package"] = tuple()  # type: ignore
     dist_type: DistType = DistType.TAR
     body: str = ""
+    entry_points: Mapping[str, str] = dict()
 
     def build(self, build_path: Path) -> Path:
         """Builds a package and returns the dist path."""
@@ -56,19 +57,20 @@ setup(
     py_modules=["{self.name}"],
     install_requires={[pkg.name for pkg in self.dependencies]},
     entry_points={{
-        'console_scripts': ['{self.name}={self.name}:main']
+        "console_scripts":
+            [{','.join(f"'{name}={self.name}:{name}'" for name in self.entry_points)}]
     }},
 )
 """
 
     def _generate_module(self) -> str:
         """Generates the content for the python module."""
+        newline = "\n"
         return f"""
 __version__ = '{self.version}'
 __mock__ = True
 
-def main():
-    pass
+{newline.join(f'def {name}(): {body}{newline}' for name, body in self.entry_points.items())}
 
 {self.body}
 """

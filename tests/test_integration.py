@@ -31,6 +31,8 @@ def test_forward_to_subprocess(default_pkg: Package) -> None:
     )
 
 
-def test_forward_binaries_to_subprocesses(default_pkg: Package) -> None:
-    scriptenv.requires(default_pkg.name)
-    subprocess.run([default_pkg.name], check=True)
+def test_forward_binaries_to_subprocesses(mockpi: MockPI) -> None:
+    package = Package(entry_points=dict(main="pass"))
+    mockpi.add(package)
+    scriptenv.requires(package.name)
+    subprocess.run(["main"], check=True)
