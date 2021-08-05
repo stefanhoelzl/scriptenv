@@ -34,6 +34,9 @@ setup(
         "Topic :: System :: Software Distribution",
     ],
     packages=[ProjectName],
+    entry_points={
+        "console_scripts": ["scriptenv=scriptenv.cli:main"],
+    },
     install_requires=["pip>=19.3", "appdirs"],
     zip_safe=False,
 )

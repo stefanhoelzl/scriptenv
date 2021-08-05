@@ -36,3 +36,14 @@ def test_forward_binaries_to_subprocesses(mockpi: MockPI) -> None:
     mockpi.add(package)
     scriptenv.requires(package.name)
     subprocess.run(["main"], check=True)
+
+
+@pytest.mark.skip(reason="changing cache directory via config must be supported")
+def test_cli_run(mockpi: MockPI) -> None:
+    distinct_error_code = 99
+    package = Package(entry_points=dict(main=f"return {distinct_error_code}"))
+    mockpi.add(package)
+    process = subprocess.run(
+        ["scriptenv", "run", package.name, "-c", "main"], check=False
+    )
+    assert process.returncode == distinct_error_code
