@@ -43,9 +43,11 @@ def pytest_configure(config: Config) -> None:
 
 
 @pytest.fixture(autouse=True, scope="function")
-def patch_cache_path(tmp_path: Path) -> Generator[None, None, None]:
+def patch_appdirs(tmp_path: Path) -> Generator[None, None, None]:
     """Patches appdirs to use a temporary directory"""
-    with patch.object(appdirs, "user_cache_dir", return_value=tmp_path / "cache"):
+    with patch.object(
+        appdirs, "user_cache_dir", return_value=tmp_path / "appdirs" / "user_cache_dir"
+    ):
         yield
     if Path(appdirs.user_cache_dir("scriptenv")).exists():
         raise RuntimeError("Test was not using patched appdirs.user_cache_dir")

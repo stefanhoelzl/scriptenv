@@ -7,34 +7,32 @@ import sys
 from pathlib import Path
 from typing import Iterable, List, Optional, Set
 
-import appdirs
-
 from . import pip
+from .config import Config
 
 
 class ScriptEnv:
     """Builds a environment to import packages within a script."""
 
-    def __init__(self, path: Optional[Path] = None) -> None:
+    def __init__(self, config: Optional[Config] = None) -> None:
         """Initializes a ScriptEnv with `path` as cache directory."""
-        path = path or Path(appdirs.user_cache_dir(__name__))
-        self._path = path.absolute()
+        self._config = config or Config()
         self.locks_path.mkdir(parents=True, exist_ok=True)
 
     @property
     def locks_path(self) -> Path:
         """Path where the lock files are stored"""
-        return self._path / "locks"
+        return self._config.cache_path / "locks"
 
     @property
     def install_path(self) -> Path:
         """Path where the packages are installed"""
-        return self._path / "install"
+        return self._config.cache_path / "install"
 
     @property
     def package_cache_path(self) -> Path:
         """Paths where the downloaded packages are cached"""
-        return self._path / "cache"
+        return self._config.cache_path / "cache"
 
     def apply(self, requirements: Iterable[str]) -> None:
         """Applies requirements to the current runtime."""
