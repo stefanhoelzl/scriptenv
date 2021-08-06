@@ -13,7 +13,7 @@ Install `scriptenv`
 $ pip install scriptenv
 ```
 
-and you can use any package you want in your REPL or short-lived scripts
+use any package you want in your REPL or short-lived scripts
 ```python
 import scriptenv
 scriptenv.requires('requests==2.25.1')
@@ -21,6 +21,12 @@ scriptenv.requires('requests==2.25.1')
 import requests
 assert requests.__version__ == "2.25.1"
 requests.get('http://www.google.com')
+```
+
+use a binary/entry point defined in any package
+```bash
+$ scriptenv run black==21.5b2 -c black --version
+black, version 21.5b2
 ```
 
 ## Why Another Venv/Package Manager Project
@@ -45,7 +51,7 @@ $ git clone https://github.com/stefanhoelzl/scriptenv.git
 $ cd scriptenv
 ```
 
-Optionally you can create a [venv](https://docs.python.org/3.8/library/venv.html)
+Optionally create a [venv](https://docs.python.org/3.8/library/venv.html)
 ```bash
 $ python -m venv venv
 $ source venv/bin/activate
