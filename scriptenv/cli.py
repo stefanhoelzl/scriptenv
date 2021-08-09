@@ -5,13 +5,12 @@ import subprocess
 import sys
 from typing import Iterable, List, Optional
 
-from .scriptenv import ScriptEnv
+from . import requires
 
 
 def run(requirements: Iterable[str], cmd: Iterable[str]) -> int:
     """Executes a package binary."""
-    env = ScriptEnv()
-    env.apply(requirements)
+    requires(*requirements)
     return subprocess.run(list(cmd), check=False).returncode
 
 

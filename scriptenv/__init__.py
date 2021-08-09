@@ -1,6 +1,6 @@
 """scriptenv"""
 
-from .scriptenv import ScriptEnv
+from .builder import ScriptEnvBuilder
 
 
 def requires(*requirements: str) -> None:
@@ -12,5 +12,6 @@ def requires(*requirements: str) -> None:
     Arguments:
         requirements: List of pip requirements required to be installed.
     """
-    env = ScriptEnv()
-    env.apply(requirements)
+    builder = ScriptEnvBuilder()
+    env = builder.build(requirements)
+    env.update_runtime()

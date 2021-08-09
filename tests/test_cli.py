@@ -17,8 +17,8 @@ def subprocess_run(mocker: MockerFixture) -> Mock:
 
 
 @pytest.fixture(autouse=True)
-def env(mocker: MockerFixture) -> Mock:
-    return mocker.patch("scriptenv.cli.ScriptEnv")
+def requires(mocker: MockerFixture) -> Mock:
+    return mocker.patch("scriptenv.cli.requires")
 
 
 def test_run_executes_subprocess(subprocess_run: Mock) -> None:
@@ -32,18 +32,17 @@ def test_run_returns_returncode(subprocess_run: Mock) -> None:
 
 
 def test_run_env_created_before_starting_subprocess(
-    subprocess_run: Mock, env: Mock
+    subprocess_run: Mock, requires: Mock
 ) -> None:
     parent_mock = Mock()
+    parent_mock.attach_mock(requires, "requires")
     parent_mock.attach_mock(subprocess_run, "subprocess")
-    parent_mock.attach_mock(env, "env")
 
-    cli.run(["requirement"], [])
+    cli.run(["requirement0", "requirement1"], [])
 
     parent_mock.assert_has_calls(
         [
-            call.env(),
-            call.env().apply(["requirement"]),
+            call.requires("requirement0", "requirement1"),
             call.subprocess([], check=False),
         ]
     )
