@@ -3,20 +3,18 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Generator
 
 import pytest
 from mockpi import MockPI, Package
 
 import scriptenv
 
-DefaultPackage = Package()
-
 
 @pytest.fixture
-def default_pkg(mockpi: MockPI) -> Generator[Package, None, None]:
-    mockpi.add(DefaultPackage)
-    yield DefaultPackage
+def default_pkg(mockpi: MockPI) -> Package:
+    package = Package()
+    mockpi.add(package)
+    return package
 
 
 def test_install_package(default_pkg: Package) -> None:
