@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Iterable, List
 
 
-# pylint: disable=too-few-public-methods
 class ScriptEnv:
     """Environment which can be applied to the current runtime."""
 
@@ -15,7 +14,7 @@ class ScriptEnv:
         self.packages_path = install_base
         self.packages = list(packages)
 
-    def update_runtime(self) -> None:
+    def enable(self) -> None:
         """
         Updates the current runtime to make the packages available.
 
@@ -37,3 +36,21 @@ class ScriptEnv:
         extend_environ_path(
             "PATH", [str(self.packages_path / pkg / "bin") for pkg in self.packages]
         )
+
+    def disable(self) -> None:
+        """Removes the entries from paths added by calling `self.enable`"""
+        package_paths = [str(self.packages_path / pkg) for pkg in self.packages]
+
+        def is_non_scriptenv_path(path: str) -> bool:
+            return not any(
+                (path.startswith(package_path) for package_path in package_paths)
+            )
+
+        def revert_environ_path(name: str) -> None:
+            os.environ[name] = os.pathsep.join(
+                filter(is_non_scriptenv_path, os.environ[name].split(os.pathsep))
+            )
+
+        sys.path = list(filter(is_non_scriptenv_path, sys.path))
+        revert_environ_path("PYTHONPATH")
+        revert_environ_path("PATH")

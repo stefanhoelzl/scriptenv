@@ -9,7 +9,7 @@ import appdirs
 
 @dataclass(frozen=True)
 class Config:
-    """Configures a ScriptEnv"""
+    """Holds scriptenv config values."""
 
     cache_path: Path = field(
         default_factory=lambda: Path(

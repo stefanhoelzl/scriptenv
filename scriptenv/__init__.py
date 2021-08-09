@@ -1,9 +1,10 @@
 """scriptenv"""
 
 from .builder import ScriptEnvBuilder
+from .scriptenv import ScriptEnv
 
 
-def requires(*requirements: str) -> None:
+def requires(*requirements: str) -> ScriptEnv:
     """Makes each requirements available to import.
 
     Installs each requirement and dependency to a seperate directory
@@ -14,4 +15,5 @@ def requires(*requirements: str) -> None:
     """
     builder = ScriptEnvBuilder()
     env = builder.build(requirements)
-    env.update_runtime()
+    env.enable()
+    return env
