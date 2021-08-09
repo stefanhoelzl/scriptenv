@@ -3,8 +3,8 @@
 import os
 import sys
 from pathlib import Path
-from types import ModuleType
-from typing import Callable, Iterable, List
+from types import ModuleType, TracebackType
+from typing import Callable, Iterable, List, Optional, Type
 
 
 class ScriptEnv:
@@ -14,6 +14,17 @@ class ScriptEnv:
         """Initializes a ScriptEnv."""
         self.packages_path = install_base
         self.packages = list(packages)
+
+    def __enter__(self) -> None:
+        self.enable()
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        self.disable()
 
     def enable(self) -> None:
         """

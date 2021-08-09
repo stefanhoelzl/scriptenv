@@ -106,3 +106,14 @@ def test_disable(tmp_path: Path, mocker: MockerFixture) -> None:
     assert "package" not in sys.modules
     assert os.environ["PYTHONPATH"] == "existing_pythonpath"
     assert os.environ["PATH"] == "existing_path"
+
+
+def test_as_contextmanager(tmp_path: Path, mocker: MockerFixture) -> None:
+    env = ScriptEnv(install_base=tmp_path, packages=[])
+    enable_mock = mocker.patch.object(env, "enable")
+    disable_mock = mocker.patch.object(env, "disable")
+
+    with env as context:
+        assert context is None
+        enable_mock.assert_called_once_with()
+    disable_mock.assert_called_once_with()

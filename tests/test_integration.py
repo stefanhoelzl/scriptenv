@@ -25,6 +25,14 @@ def test_install_package(default_pkg: Package) -> None:
     __import__(default_pkg.name)
 
 
+def test_as_contextmanager(default_pkg: Package) -> None:
+    with scriptenv.requires(default_pkg.name):
+        __import__(default_pkg.name)
+
+    with pytest.raises(ModuleNotFoundError):
+        __import__(default_pkg.name)
+
+
 def test_disable_env(default_pkg: Package) -> None:
     env = scriptenv.requires(default_pkg.name)
     env.disable()
