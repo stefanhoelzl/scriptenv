@@ -3,6 +3,7 @@
 import os
 import sys
 from pathlib import Path
+from unittest.mock import Mock
 
 from pytest_mock import MockerFixture
 
@@ -83,7 +84,11 @@ def test_enable_avoid_duplicates(tmp_path: Path, mocker: MockerFixture) -> None:
 
 
 def test_disable(tmp_path: Path, mocker: MockerFixture) -> None:
+    module_mock = Mock()
+    module_mock.__file__ = str(tmp_path / "package" / "some_file.py")
+
     mocker.patch("sys.path", ["existing_syspath", str(tmp_path / "package")])
+    mocker.patch.dict(sys.modules, dict(package=module_mock))
     mocker.patch(
         "os.environ",
         dict(
@@ -98,5 +103,6 @@ def test_disable(tmp_path: Path, mocker: MockerFixture) -> None:
     env.disable()
 
     assert sys.path == ["existing_syspath"]
+    assert "package" not in sys.modules
     assert os.environ["PYTHONPATH"] == "existing_pythonpath"
     assert os.environ["PATH"] == "existing_path"

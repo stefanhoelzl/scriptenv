@@ -3,7 +3,8 @@
 import os
 import sys
 from pathlib import Path
-from typing import Iterable, List
+from types import ModuleType
+from typing import Callable, Iterable, List
 
 
 class ScriptEnv:
@@ -25,40 +26,52 @@ class ScriptEnv:
         # first disable to avoid duplicates when already enabled
         self.disable()
 
-        def extend_environ_path(name: str, items: List[str]) -> None:
-            existing_items = (
-                os.environ[name].split(os.pathsep) if os.environ.get(name) else list()
-            )
-            os.environ[name] = os.pathsep.join(items + existing_items)
-
         sys.path[0:0] = [str(self.packages_path / pkg) for pkg in self.packages]
-        extend_environ_path(
+        _extend_environ_path(
             "PYTHONPATH", [str(self.packages_path / pkg) for pkg in self.packages]
         )
-        extend_environ_path(
+        _extend_environ_path(
             "PATH", [str(self.packages_path / pkg / "bin") for pkg in self.packages]
         )
 
     def disable(self) -> None:
-        """Removes the entries from paths added by calling `self.enable`"""
+        """
+        Removes the entries from paths added by calling `self.enable`
+
+        Additionally removes modules from `sys.modules`.
+        """
+        sys.path = list(filter(self._is_non_scriptenv_path, sys.path))
+        _revert_environ_path("PYTHONPATH", self._is_non_scriptenv_path)
+        _revert_environ_path("PATH", self._is_non_scriptenv_path)
+
+        for name in list(sys.modules):
+            if self._is_scriptenv_module(sys.modules[name]):
+                sys.modules.pop(name, None)
+
+    def _is_non_scriptenv_path(self, path: str) -> bool:
         package_paths = [str(self.packages_path / pkg) for pkg in self.packages]
-
-        def is_non_scriptenv_path(path: str) -> bool:
-            return not any(
-                (
-                    path.startswith(package_path)
-                    for package_path in package_paths
-                    if package_path
-                )
+        return not any(
+            (
+                path.startswith(package_path)
+                for package_path in package_paths
+                if package_path
             )
+        )
 
-        def revert_environ_path(name: str) -> None:
-            os.environ[name] = os.pathsep.join(
-                filter(
-                    is_non_scriptenv_path, os.environ.get(name, "").split(os.pathsep)
-                )
-            )
+    def _is_scriptenv_module(self, module: ModuleType) -> bool:
+        if getattr(module, "__file__", None) is None:
+            return False
+        return not self._is_non_scriptenv_path(module.__file__)
 
-        sys.path = list(filter(is_non_scriptenv_path, sys.path))
-        revert_environ_path("PYTHONPATH")
-        revert_environ_path("PATH")
+
+def _extend_environ_path(name: str, items: List[str]) -> None:
+    existing_items = (
+        os.environ[name].split(os.pathsep) if os.environ.get(name) else list()
+    )
+    os.environ[name] = os.pathsep.join(items + existing_items)
+
+
+def _revert_environ_path(name: str, check: Callable[[str], bool]) -> None:
+    os.environ[name] = os.pathsep.join(
+        filter(check, os.environ.get(name, "").split(os.pathsep))
+    )
