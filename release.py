@@ -23,7 +23,7 @@ CommitMessageRegex = re.compile(
 )
 
 
-def release_canidate() -> None:
+def release_candidate() -> None:
     """Sets the release-candidate tag and pushes it to master to trigger a new release."""
     print(_git("tag", "--force", "release-candidate"))
     print(_git("push", "origin", "release-candidate"))
