@@ -64,6 +64,24 @@ def test_enable_empty_paths(tmp_path: Path, mocker: MockerFixture) -> None:
     )
 
 
+def test_enable_avoid_duplicates(tmp_path: Path, mocker: MockerFixture) -> None:
+    mocker.patch("sys.path", [str(tmp_path / "package")])
+    mocker.patch(
+        "os.environ",
+        dict(
+            PATH=os.pathsep.join([str(tmp_path / "package" / "bin")]),
+            PYTHONPATH=os.pathsep.join([str(tmp_path / "package")]),
+        ),
+    )
+
+    env = ScriptEnv(install_base=tmp_path, packages=["package"])
+    env.enable()
+
+    assert sys.path == [str(tmp_path / "package")]
+    assert os.environ["PYTHONPATH"] == os.pathsep.join([str(tmp_path / "package")])
+    assert os.environ["PATH"] == os.pathsep.join([str(tmp_path / "package" / "bin")])
+
+
 def test_disable(tmp_path: Path, mocker: MockerFixture) -> None:
     mocker.patch("sys.path", ["existing_syspath", str(tmp_path / "package")])
     mocker.patch(

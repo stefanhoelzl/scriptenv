@@ -22,10 +22,12 @@ class ScriptEnv:
         PYTHONPATH gets updated to support imports in subprocesses.
         PATH gets updated to support entry points called from subprocesses.
         """
+        # first disable to avoid duplicates when already enabled
+        self.disable()
 
         def extend_environ_path(name: str, items: List[str]) -> None:
             existing_items = (
-                os.environ[name].split(os.pathsep) if name in os.environ else list()
+                os.environ[name].split(os.pathsep) if os.environ.get(name) else list()
             )
             os.environ[name] = os.pathsep.join(items + existing_items)
 
@@ -43,12 +45,18 @@ class ScriptEnv:
 
         def is_non_scriptenv_path(path: str) -> bool:
             return not any(
-                (path.startswith(package_path) for package_path in package_paths)
+                (
+                    path.startswith(package_path)
+                    for package_path in package_paths
+                    if package_path
+                )
             )
 
         def revert_environ_path(name: str) -> None:
             os.environ[name] = os.pathsep.join(
-                filter(is_non_scriptenv_path, os.environ[name].split(os.pathsep))
+                filter(
+                    is_non_scriptenv_path, os.environ.get(name, "").split(os.pathsep)
+                )
             )
 
         sys.path = list(filter(is_non_scriptenv_path, sys.path))
