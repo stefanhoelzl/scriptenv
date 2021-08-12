@@ -1,6 +1,7 @@
 .mypy_cache
 .pytest_cache
 .coverage
+.coverage.ws*
 __pycache__
 venv
 scriptenv.egg-info
