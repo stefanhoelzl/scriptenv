@@ -73,6 +73,31 @@ jobs:
           scriptenv.requires('requests==2.25.1')
           import requests
           assert requests.__version__ == '2.25.1'
+      - name: Upload Coverage Html
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-py${{ matrix.python }}-${{ matrix.os }}
+          path: cov_html
+  docs:
+    runs-on: ubuntu-20.04
+    needs: [test]
+    steps:
+      - name: Download Coverage Html
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-py3.9-ubuntu-20.04
+          path: cov_html
+      - name: Modify Coverage For GitHub Pages
+        run: |
+          touch cov_html/.nojekyll
+      - name: Deploy GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          target_branch: gh-pages
+          build_dir: cov_html
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release:
     runs-on: ubuntu-20.04
     needs: [test]

@@ -1,8 +1,14 @@
+# caches
 .mypy_cache
 .pytest_cache
+__pycache__
+
+# coverage
 .coverage
 .coverage.ws*
-__pycache__
+cov_html
+
+# build
 venv
 scriptenv.egg-info
 build

@@ -1,6 +1,6 @@
 # scriptenv
 [![Build Status](https://github.com/stefanhoelzl/scriptenv/workflows/push/badge.svg)](https://github.com/stefanhoelzl/scriptenv/actions)
-![Coverage](https://img.shields.io/badge/coverage-100%25-success?style=flat)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-success?style=flat)](https://stefanhoelzl.github.io/scriptenv/)
 [![PyPI](https://img.shields.io/pypi/v/scriptenv.svg)](https://pypi.org/project/scriptenv/)
 [![Downloads](https://img.shields.io/pypi/dm/scriptenv?color=blue&logo=pypi&logoColor=yellow)](https://pypistats.org/packages/scriptenv)
 [![License](https://img.shields.io/pypi/l/scriptenv.svg)](LICENSE)

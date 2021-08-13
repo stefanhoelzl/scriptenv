@@ -35,7 +35,10 @@ def pytest_configure(config: Config) -> None:
 
     config.option.cov_source = ["scriptenv"]
     config.option.cov_fail_under = 100
-    config.option.cov_report = "term-missing"
+    config.option.cov_report = {
+        "term-missing": None,
+        "html": "cov_html",
+    }
     config.option.cov_branch = True
     config.pluginmanager.register(
         CovPlugin(config.option, config.pluginmanager), "_cov"
