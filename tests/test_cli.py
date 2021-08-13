@@ -48,7 +48,7 @@ def test_run_env_created_before_starting_subprocess(
     )
 
 
-def test_main_forward_return_value(mocker: MockerFixture) -> None:
+def test_run_from_main(mocker: MockerFixture) -> None:
     mocker.patch.object(cli, "run").return_value = 1
     assert cli.main(["run", "cmd"]) == 1
 
@@ -70,3 +70,9 @@ def test_main_run_parser(mocker: MockerFixture) -> None:
 
     cli.main(["run", "-r", "requirement0", "requirement1", "--", "cmd", "arg"])
     run_mock.assert_called_with(["requirement0", "requirement1"], cmd=["cmd", "arg"])
+
+
+def test_main_without_args() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli.main([])
+    assert exc_info.value.code == 0

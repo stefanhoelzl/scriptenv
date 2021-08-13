@@ -16,7 +16,10 @@ def run(requirements: Iterable[str], cmd: Iterable[str]) -> int:
 
 def main(args: Optional[List[str]] = None) -> int:
     """scriptenv cli main entrypoint"""
-    args = args or sys.argv[1:]
+    if args is None:
+        args = sys.argv[1:]
+    elif not args:
+        args = ["--help"]
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
