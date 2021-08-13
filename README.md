@@ -25,7 +25,7 @@ requests.get('http://www.google.com')
 
 use a binary/entry point defined in any package
 ```bash
-$ scriptenv run black==21.5b2 -c black --version
+$ scriptenv run -r black==21.5b2 -- black --version
 black, version 21.5b2
 ```
 

@@ -22,9 +22,11 @@ def main(args: Optional[List[str]] = None) -> int:
     subparsers = parser.add_subparsers()
 
     run_parser = subparsers.add_parser("run")
-    run_parser.add_argument("requirements", nargs="*")
-    run_parser.add_argument("-c", "--command", action="store", nargs="+", type=str)
-    run_parser.set_defaults(func=lambda args: run(args.requirements, cmd=args.command))
+    run_parser.add_argument(
+        "--requires", "-r", action="store", nargs="*", type=str, default=list()
+    )
+    run_parser.add_argument("command", nargs="+", type=str)
+    run_parser.set_defaults(func=lambda args: run(args.requires, cmd=args.command))
 
     parsed = parser.parse_args(args)
     return parsed.func(parsed)  # type: ignore

@@ -50,20 +50,23 @@ def test_run_env_created_before_starting_subprocess(
 
 def test_main_forward_return_value(mocker: MockerFixture) -> None:
     mocker.patch.object(cli, "run").return_value = 1
-    assert cli.main(["run", "-c", "cmd"]) == 1
+    assert cli.main(["run", "cmd"]) == 1
 
 
 def test_main_run_parser(mocker: MockerFixture) -> None:
     run_mock = mocker.patch.object(cli, "run")
 
-    cli.main(["run", "-c", "cmd"])
+    cli.main(["run", "cmd"])
     run_mock.assert_called_with([], cmd=["cmd"])
 
-    cli.main(["run", "--command", "cmd"])
-    run_mock.assert_called_with([], cmd=["cmd"])
-
-    cli.main(["run", "--command", "cmd", '"with spaces"'])
+    cli.main(["run", "cmd", '"with spaces"'])
     run_mock.assert_called_with([], cmd=["cmd", '"with spaces"'])
 
-    cli.main(["run", "requirement0", "requirement1", "-c", "cmd", "arg"])
+    cli.main(["run", "-r", "requirement0", "--", "cmd", "arg"])
+    run_mock.assert_called_with(["requirement0"], cmd=["cmd", "arg"])
+
+    cli.main(["run", "--requires", "requirement0", "--", "cmd", "arg"])
+    run_mock.assert_called_with(["requirement0"], cmd=["cmd", "arg"])
+
+    cli.main(["run", "-r", "requirement0", "requirement1", "--", "cmd", "arg"])
     run_mock.assert_called_with(["requirement0", "requirement1"], cmd=["cmd", "arg"])

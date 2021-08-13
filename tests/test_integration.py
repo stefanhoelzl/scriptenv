@@ -59,7 +59,7 @@ def test_cli_run(mockpi: MockPI, tmp_path: Path) -> None:
     package = Package(entry_points=dict(main=f"return {distinct_error_code}"))
     mockpi.add(package)
     process = subprocess.run(
-        ["scriptenv", "run", package.name, "-c", "main"],
+        ["scriptenv", "run", "-r", package.name, "--", "main"],
         env=dict(
             SCRIPTENV_CACHE_PATH=str(tmp_path / "subprocess_cache_path"), **os.environ
         ),
