@@ -52,8 +52,6 @@ def patch_appdirs(tmp_path: Path) -> Generator[None, None, None]:
         appdirs, "user_cache_dir", return_value=tmp_path / "appdirs" / "user_cache_dir"
     ):
         yield
-    if Path(appdirs.user_cache_dir("scriptenv")).exists():
-        raise RuntimeError("Test was not using patched appdirs.user_cache_dir")
 
 
 @pytest.fixture(autouse=True, scope="function")

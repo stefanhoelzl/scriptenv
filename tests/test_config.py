@@ -29,6 +29,29 @@ def test_environ_overrides(mocker: MockFixture) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "env_value, casted_value",
+    [
+        ("false", False),
+        ("no", False),
+        ("off", False),
+        ("OFF", False),
+        ("", True),
+        ("everything-else", True),
+    ],
+)
+def test_environ_bool_casts(
+    env_value: str, casted_value: bool, mocker: MockFixture
+) -> None:
+    mocker.patch.dict(
+        os.environ,
+        dict(SCRIPTENV_USE_LOCKFILE=env_value),
+    )
+    assert Config() == Config(
+        use_lockfile=casted_value,
+    )
+
+
 def test_immutable() -> None:
     with pytest.raises(FrozenInstanceError):
         Config().cache_path = Path()  # type: ignore
