@@ -65,7 +65,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           pytest
-      - name: Run Smoke Test
+      - name: API Smoke Test
         shell: python
         run: |
           import scriptenv
@@ -73,6 +73,10 @@ jobs:
           scriptenv.requires('requests==2.25.1')
           import requests
           assert requests.__version__ == '2.25.1'
+      - name: CLI Smoke Test
+        shell: bash
+        run: |
+          scriptenv run -r black==21.5b1 -- black --version | grep 21.5b1
       - name: Upload Coverage Html
         uses: actions/upload-artifact@v2
         with:
