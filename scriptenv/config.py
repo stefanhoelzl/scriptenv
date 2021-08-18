@@ -17,3 +17,6 @@ class Config:
             or appdirs.user_cache_dir("scriptenv")
         )
     )
+    use_lockfile: bool = field(
+        default_factory=lambda: os.environ.get("SCRIPTENV_USE_LOCKFILE") != "false"
+    )

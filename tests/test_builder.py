@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import call
 
@@ -27,7 +28,7 @@ def test_paths(config: Config) -> None:
     assert builder.locks_path.is_dir()
 
 
-def test_fetch_requirements_from_cached_file(
+def test_fetch_requirements_from_lockfile(
     config: Config, mocker: MockerFixture
 ) -> None:
     download_mock = mocker.patch("scriptenv.pip.download")
@@ -67,6 +68,26 @@ def test_fetch_requirements_with_pip(config: Config, mocker: MockerFixture) -> N
         ["requirement0", "requirement1"], config.cache_path / "cache"
     )
     assert set(json.loads(lockfile.read_text())) == {"resolved", "packages"}
+
+
+def test_fetch_requirements_disable_lockfile(
+    config: Config, mocker: MockerFixture
+) -> None:
+    download_mock = mocker.patch("scriptenv.pip.download")
+    download_mock.return_value = {"resolved", "packages"}
+    lockfile = (
+        config.cache_path
+        / "locks"
+        / hashlib.md5(b"requirement0\nrequirement1").hexdigest()
+    )
+    lockfile.parent.mkdir(parents=True)
+    lockfile.write_text('["cached", "packages"]')
+
+    builder = ScriptEnvBuilder(replace(config, use_lockfile=False))
+    assert builder.fetch_requirements(["requirement0", "requirement1"]) == {
+        "resolved",
+        "packages",
+    }
 
 
 def test_install_packages(config: Config, mocker: MockerFixture) -> None:

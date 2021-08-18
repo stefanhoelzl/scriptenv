@@ -12,12 +12,21 @@ from scriptenv.config import Config
 
 
 def test_defaults() -> None:
-    assert Config() == Config(cache_path=Path(appdirs.user_cache_dir("scriptenv")))
+    assert Config() == Config(
+        cache_path=Path(appdirs.user_cache_dir("scriptenv")),
+        use_lockfile=True,
+    )
 
 
 def test_environ_overrides(mocker: MockFixture) -> None:
-    mocker.patch.dict(os.environ, dict(SCRIPTENV_CACHE_PATH="/custom/path"))
-    assert Config() == Config(cache_path=Path("/custom/path"))
+    mocker.patch.dict(
+        os.environ,
+        dict(SCRIPTENV_CACHE_PATH="/custom/path", SCRIPTENV_USE_LOCKFILE="false"),
+    )
+    assert Config() == Config(
+        cache_path=Path("/custom/path"),
+        use_lockfile=False,
+    )
 
 
 def test_immutable() -> None:

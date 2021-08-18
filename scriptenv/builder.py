@@ -44,10 +44,11 @@ class ScriptEnvBuilder:
         lock = hashlib.md5("\n".join(requirements).encode("utf-8")).hexdigest()
         lockfile_path = self.locks_path / lock
 
-        if not lockfile_path.is_file():
+        if not lockfile_path.is_file() or not self._config.use_lockfile:
             packages = pip.download(requirements, self.package_cache_path)
+            if not self._config.use_lockfile:
+                return packages
             lockfile_path.write_text(json.dumps(list(packages), indent=2))
-
         return set(json.loads(lockfile_path.read_text()))
 
     def install_packages(self, packages: Iterable[str]) -> None:
