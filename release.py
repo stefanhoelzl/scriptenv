@@ -33,11 +33,9 @@ def release_candidate() -> None:
 
 def check_commit_messages() -> Generator[str, None, None]:
     """Checks if the all commit messages in the log are valid."""
-    invalid_messages = [
-        msg
-        for msg in _git("log", "--pretty=%s").split("\n")
-        if not re.match(CommitMessageRegex, msg)
-    ]
+    invalid_messages = _commits_by_category(_commits_since(commit_hash=None)).get(
+        None, list()
+    )
     yield from (f"Invalid commit message: {msg}" for msg in invalid_messages)
     if invalid_messages:
         sys.exit(1)
@@ -68,7 +66,7 @@ def version() -> str:
     return f"{new_version}{dev_version_postfix}"
 
 
-_CommitsByCategory = Dict[str, List[str]]
+_CommitsByCategory = Dict[Optional[str], List[str]]
 
 
 class _VersionTag(NamedTuple):
@@ -109,11 +107,13 @@ def _commits_since(commit_hash: Optional[str]) -> Iterable[str]:
 
 
 def _commits_by_category(commits: Iterable[str]) -> _CommitsByCategory:
-    commits_by_category = defaultdict(list)
+    commits_by_category: _CommitsByCategory = defaultdict(list)
     for msg in commits:
         match = re.match(CommitMessageRegex, msg)
         if match:
             commits_by_category[match.group("category")].append(match.group("message"))
+        else:
+            commits_by_category[None].append(msg)
     return commits_by_category
 
 
@@ -134,4 +134,4 @@ def _formatted_category(
 
 
 if __name__ == "__main__":
-    fire.Fire()
+    fire.Fire()  # pragma: no cover
