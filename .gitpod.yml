@@ -6,3 +6,6 @@ tasks:
 ports:
   - port: 9000
     onOpen: ignore
+vscode:
+  extensions:
+    - ms-python.python

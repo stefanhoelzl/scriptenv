@@ -1,0 +1,7 @@
+{
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "files.autoSave": "onFocusChange",
+    "python.autoComplete.addBrackets": true,
+    "python.formatting.provider": "black"
+}

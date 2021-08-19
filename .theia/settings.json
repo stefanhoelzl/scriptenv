@@ -1,7 +1,0 @@
-{
-    "editor.autoSave": "on",
-    "python.autoComplete.addBrackets": true,
-    "python.formatting.provider": "black",
-    "editor.formatOnSave": true,
-    "python.linting.pylintEnabled": true
-}
