@@ -63,7 +63,7 @@ $ pip install -r requirements.txt
 ```
 
 Install scriptenv from repository
-````bash
+```bash
 $ pip install -e .
 ```
 
