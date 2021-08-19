@@ -77,7 +77,7 @@ def tag_factory(git_repo: GitRepo) -> TagFactory:
 
 
 @pytest.mark.parametrize(
-    "allowed_keyword", ["internal", "bugfix", "feature", "internal", "tooling"]
+    "allowed_keyword", ["internal", "bugfix", "feature", "internal", "tooling", "docs"]
 )
 def test_check_valid_commit_message(
     allowed_keyword: str, commit_factory: CommitFactory
@@ -104,6 +104,7 @@ def test_changelog(commit_factory: CommitFactory) -> None:
             "[bugfix] bugfix",
             "[feature] feature",
             "[tooling] hidden",
+            "[docs] hidden",
         ]
     )
     assert list(release.changelog()) == [

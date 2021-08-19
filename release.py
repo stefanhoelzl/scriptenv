@@ -16,6 +16,7 @@ CategoryKeywords = {
     "Bugfixes": "bugfix",
     "Internal": "internal",
     "Tooling": "tooling",
+    "Documentation": "docs",
 }
 ChangelogCategories = ["Features", "Bugfixes", "Internal"]
 CommitMessageRegex = re.compile(
