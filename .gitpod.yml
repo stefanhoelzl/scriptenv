@@ -1,8 +1,7 @@
 image: python:3.9
 tasks:
   - init: |
-      pip install -r dev-requirements.txt
-      pip install -e .
+      pip install -r requirements.txt
 ports:
   - port: 9000
     onOpen: ignore

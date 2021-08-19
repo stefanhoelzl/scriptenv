@@ -14,3 +14,6 @@ scriptenv.egg-info
 build
 dist
 changelog.md
+
+# docs
+site

@@ -13,7 +13,7 @@ setup(
     version=version(),
     author="Stefan Hoelzl",
     author_email=f"stefanh+{ProjectName}@posteo.de",
-    url="https://github.com/stefanhoelzl/scriptenv/",
+    url="https://stefanhoelzl.github.io/scriptenv/",
     license="MIT",
     description="define virtual environments within your code",
     long_description=Path("README.md").read_text(),

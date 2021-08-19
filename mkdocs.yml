@@ -1,0 +1,28 @@
+site_name: scriptenv Documentation
+repo_url: https://github.com/stefanhoelzl/scriptenv
+repo_name: stefanhoelzl/scriptenv
+strict: True
+theme:
+  name: material
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+extra:
+  social:
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/scriptenv/
+      name: scirptenv on PyPI
+    - icon: octicons/file-diff-24
+      link: coverage
+      name: scriptenv code coverage

@@ -28,7 +28,7 @@ jobs:
           python-version: 3.9
       - name: Install Requirements
         run: |
-          pip install -r dev-requirements.txt
+          pip install -r requirements/build.txt
       - name: Build Wheel
         run: |
           python setup.py bdist_wheel
@@ -58,9 +58,7 @@ jobs:
           path: dist
       - name: Install Requirements
         run: |
-          pip install -r dev-requirements.txt
-      - name: Install Scriptenv
-        run: |
+          pip install -r requirements.txt
           pip install --use-feature=in-tree-build --editable .
       - name: Run Unit Tests
         run: |
@@ -86,22 +84,39 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [test]
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1.2.0
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+      - name: Install Requirements
+        run: |
+          pip install -r requirements/docs.txt
+      - name: Build Docs
+        run: |
+          mkdocs build
       - name: Download Coverage Html
         uses: actions/download-artifact@v2
         with:
           name: coverage-py3.9-ubuntu-20.04
-          path: cov_html
-      - name: Modify Coverage For GitHub Pages
+          path: site/coverage
+      - name: Set .nojekyll
         run: |
-          touch cov_html/.nojekyll
+          touch site/.nojekyll
       - name: Deploy GitHub Pages
         uses: crazy-max/ghaction-github-pages@v2
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
           target_branch: gh-pages
-          build_dir: cov_html
+          build_dir: site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs
+          path: site
   release:
     runs-on: ubuntu-20.04
     needs: [test]
@@ -116,7 +131,7 @@ jobs:
           python-version: 3.9
       - name: Install Requirements
         run: |
-          pip install -r dev-requirements.txt
+          pip install -r requirements/release.txt
       - name: Download Wheel
         uses: actions/download-artifact@v2
         with:
@@ -139,7 +154,7 @@ jobs:
       - name: Publish Master Github Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          gh release create master ./dist/*.whl -F changelog.md
+          gh release create master ./dist/*.whl -F changelog.md --prerelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish Github Release
