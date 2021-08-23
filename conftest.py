@@ -22,6 +22,8 @@ def pytest_configure(config: Config) -> None:
     config.option.newfirst = True
     config.option.failedfirst = True
     config.option.tbstyle = "short"
+    config.option.durations = 0
+    config.option.durations_min = 1
 
     config.option.pylint = True
     config.option.black = True
