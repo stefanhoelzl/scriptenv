@@ -10,3 +10,5 @@ pytest-mock==3.6.1
 
 black==21.5b2
 isort==5.8.0
+
+markdown-it-py==1.1.0

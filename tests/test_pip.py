@@ -4,10 +4,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from mockpi import DistType, MockPI, Package
 
 from scriptenv import pip
 from scriptenv.pip import _pip as pip_exec
+from testlibs.mockpi import DistType, MockPI, Package
 
 
 @pytest.mark.parametrize("dist_type", list(DistType))

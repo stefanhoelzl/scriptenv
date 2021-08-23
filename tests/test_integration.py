@@ -5,9 +5,9 @@ import sys
 from pathlib import Path
 
 import pytest
-from mockpi import MockPI, Package
 
 import scriptenv
+from testlibs.mockpi import MockPI, Package
 
 
 @pytest.fixture
@@ -60,9 +60,10 @@ def test_cli_run(mockpi: MockPI, tmp_path: Path) -> None:
     mockpi.add(package)
     process = subprocess.run(
         ["scriptenv", "run", "-r", package.name, "--", "main"],
-        env=dict(
-            SCRIPTENV_CACHE_PATH=str(tmp_path / "subprocess_cache_path"), **os.environ
-        ),
+        env={
+            **os.environ,
+            "SCRIPTENV_CACHE_PATH": str(tmp_path / "subprocess_cache_path"),
+        },
         check=False,
     )
     assert process.returncode == distinct_error_code

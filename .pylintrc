@@ -2,3 +2,6 @@
 
 # Naming style matching correct class constant names.
 const-naming-style=PascalCase
+
+[TYPECHECK]
+generated-members=py.path

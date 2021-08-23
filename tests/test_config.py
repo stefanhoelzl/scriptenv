@@ -12,6 +12,7 @@ from scriptenv.config import Config
 
 
 def test_defaults() -> None:
+    del os.environ["SCRIPTENV_CACHE_PATH"]
     assert Config() == Config(
         cache_path=Path(appdirs.user_cache_dir("scriptenv")),
         use_lockfile=True,

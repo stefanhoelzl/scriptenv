@@ -8,9 +8,12 @@ from unittest.mock import patch
 import appdirs
 import pytest
 from _pytest.config import Config
-from mockpi import MockPI
 from pytest_cov.plugin import CovPlugin
 from pytest_mock import MockerFixture
+
+from testlibs.mockpi import MockPI
+
+pytest_plugins = ["testlibs.markdown"]
 
 
 @pytest.mark.tryfirst
@@ -23,6 +26,7 @@ def pytest_configure(config: Config) -> None:
     config.option.pylint = True
     config.option.black = True
     config.option.isort = True
+    config.option.markdown = True
 
     config.option.mypy = True
     config.option.mypy_ignore_missing_imports = True
@@ -45,7 +49,13 @@ def pytest_configure(config: Config) -> None:
     )
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(autouse=True)
+def set_cache_path(tmp_path: Path) -> None:
+    """Patches the default cache dir for scriptenv"""
+    os.environ["SCRIPTENV_CACHE_PATH"] = str(tmp_path / "temp_cache_path")
+
+
+@pytest.fixture(autouse=True)
 def patch_appdirs(tmp_path: Path) -> Generator[None, None, None]:
     """Patches appdirs to use a temporary directory"""
     with patch.object(
@@ -54,13 +64,13 @@ def patch_appdirs(tmp_path: Path) -> Generator[None, None, None]:
         yield
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(autouse=True)
 def save_and_restore_sys_path(mocker: MockerFixture) -> None:
     """Saves and restores sys.path."""
     mocker.patch("sys.path", list(sys.path))
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(autouse=True)
 def save_and_restore_os_environ() -> Generator[None, None, None]:
     """Saves and restores os.environ."""
     backup = dict(os.environ)
@@ -71,7 +81,7 @@ def save_and_restore_os_environ() -> Generator[None, None, None]:
         os.environ.update(backup)
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(autouse=True)
 def cleanup_sys_modules() -> None:
     """Removes test packages from sys.modules."""
     for name, module in list(sys.modules.items()):
