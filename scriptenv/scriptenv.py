@@ -76,9 +76,7 @@ class ScriptEnv:
 
 
 def _extend_environ_path(name: str, items: List[str]) -> None:
-    existing_items = (
-        os.environ[name].split(os.pathsep) if os.environ.get(name) else list()
-    )
+    existing_items = os.environ[name].split(os.pathsep) if os.environ.get(name) else []
     os.environ[name] = os.pathsep.join(items + existing_items)
 
 

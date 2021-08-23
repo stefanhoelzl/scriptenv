@@ -42,7 +42,7 @@ def test_enable(tmp_path: Path, mocker: MockerFixture) -> None:
 
 def test_enable_empty_paths(tmp_path: Path, mocker: MockerFixture) -> None:
     mocker.patch("sys.path", [])
-    mocker.patch("os.environ", dict())
+    mocker.patch("os.environ", {})
 
     env = ScriptEnv(install_base=tmp_path, packages=["pkg0", "pkg1"])
     env.enable()

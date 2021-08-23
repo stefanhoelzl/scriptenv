@@ -30,7 +30,7 @@ class Package(NamedTuple):
     dependencies: Iterable["Package"] = tuple()  # type: ignore
     dist_type: DistType = DistType.TAR
     body: str = ""
-    entry_points: Mapping[str, str] = dict()
+    entry_points: Mapping[str, str] = {}
 
     def build(self, build_path: Path) -> Path:
         """Builds a package and returns the dist path."""

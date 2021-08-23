@@ -35,7 +35,7 @@ def release_candidate() -> None:
 def check_commit_messages() -> Generator[str, None, None]:
     """Checks if the all commit messages in the log are valid."""
     invalid_messages = _commits_by_category(_commits_since(commit_hash=None)).get(
-        None, list()
+        None, []
     )
     yield from (f"Invalid commit message: {msg}" for msg in invalid_messages)
     if invalid_messages:

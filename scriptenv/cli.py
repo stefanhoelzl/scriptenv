@@ -26,7 +26,7 @@ def main(args: Optional[List[str]] = None) -> int:
 
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument(
-        "--requires", "-r", action="store", nargs="*", type=str, default=list()
+        "--requires", "-r", action="store", nargs="*", type=str, default=[]
     )
     run_parser.add_argument("command", nargs="+", type=str)
     run_parser.set_defaults(func=lambda args: run(args.requires, cmd=args.command))
