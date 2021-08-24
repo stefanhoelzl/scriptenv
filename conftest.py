@@ -84,11 +84,15 @@ def save_and_restore_os_environ() -> Generator[None, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def cleanup_sys_modules() -> None:
-    """Removes test packages from sys.modules."""
-    for name, module in list(sys.modules.items()):
-        if getattr(module, "__mock__", False):
-            del sys.modules[name]
+def restore_sys_modules() -> Generator[None, None, None]:
+    """Restores sys.modules."""
+    backup = set(sys.modules.keys())
+    try:
+        yield
+    finally:
+        for name in list(sys.modules.keys()):
+            if name not in backup:
+                del sys.modules[name]
 
 
 @pytest.fixture

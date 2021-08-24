@@ -68,7 +68,6 @@ setup(
         newline = "\n"
         return f"""
 __version__ = '{self.version}'
-__mock__ = True
 
 {newline.join(f'def {name}(): {body}{newline}' for name, body in self.entry_points.items())}
 
