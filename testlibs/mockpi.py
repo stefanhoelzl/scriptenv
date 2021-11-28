@@ -8,7 +8,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
-from typing import Generator, Iterable, Mapping, NamedTuple
+from typing import Generator, Iterable, Mapping, NamedTuple, Optional
 from unittest.mock import patch
 
 from setuptools import sandbox
@@ -109,6 +109,8 @@ class MockPI:
         self._serve_path = path / "packages"
         self._build_path = path / "build"
 
+        self.url: Optional[str] = None
+
     def add(self, pkg: Package) -> None:
         """Adds a dummy package to the pypi server"""
         serve_path = self._serve_path / pkg.name
@@ -120,7 +122,9 @@ class MockPI:
     def server(self) -> Generator[None, None, None]:
         """Starts the pypi server"""
         with _serve_directory(self._serve_path) as url:
+            self.url = url
             with patch.dict(
                 os.environ, dict(PIP_INDEX_URL=url, PIP_NO_CACHE_DIR="off")
             ):
                 yield
+            self.url = None
