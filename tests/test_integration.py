@@ -47,6 +47,20 @@ def test_forward_to_subprocess(default_pkg: Package) -> None:
     )
 
 
+def test_from_pipfile_lock(tmp_path: Path, mockpi: MockPI) -> None:
+    mockpi.add(Package(name="pkg"))
+
+    pipfile = tmp_path / "Pipfile"
+    pipfile.write_text("[packages]\npkg = '*'")
+    subprocess.run(
+        ["pipenv", f"--pypi-mirror={mockpi.url}", "lock"], cwd=tmp_path, check=True
+    )
+
+    scriptenv.from_pipfile_lock(tmp_path / "Pipfile.lock")
+
+    __import__("pkg")
+
+
 def test_forward_binaries_to_subprocesses(mockpi: MockPI) -> None:
     package = Package(entry_points=dict(main="pass"))
     mockpi.add(package)
