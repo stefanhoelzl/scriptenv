@@ -139,10 +139,10 @@ jobs:
           path: dist
       - name: Check Commit Messages
         run: |
-          python release.py check-commit-messages
+          python tools/release.py check-commit-messages
       - name: Generate Changelog
         run: |
-          python release.py changelog > changelog.md
+          python tools/release.py changelog > changelog.md
       - name: Delete Previous Master Github Release
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
@@ -160,7 +160,7 @@ jobs:
       - name: Publish Github Release
         if: ${{ github.ref == 'refs/tags/release-candidate' }}
         run: |
-          gh release create v`python release.py version` ./dist/*.whl -F changelog.md
+          gh release create v`python tools/release.py version` ./dist/*.whl -F changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish PyPI

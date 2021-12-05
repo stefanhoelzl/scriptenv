@@ -74,5 +74,5 @@ $ pytest
 
 Trigger a new release build
 ```bash
-$ python release.py release-candidate
+$ python tools/release.py release-candidate
 ```

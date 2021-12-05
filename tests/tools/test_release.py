@@ -11,7 +11,7 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.monkeypatch import MonkeyPatch
 from pytest_git import GitRepo
 
-import release
+from tools import release
 
 CommitFactory = Callable[[List[str]], List[str]]
 TagFactory = Callable[[Dict[str, str]], None]

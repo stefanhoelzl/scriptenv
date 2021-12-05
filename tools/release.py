@@ -135,4 +135,4 @@ def _formatted_category(
 
 
 if __name__ == "__main__":
-    fire.Fire()  # pragma: no cover
+    fire.Fire()
