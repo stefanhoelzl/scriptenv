@@ -26,11 +26,11 @@ def test_parse_pipfile_lock_from_folder(tmp_path: Path) -> None:
     pipfile_lock = tmp_path / "Pipfile.lock"
     pipfile_lock.write_text(json.dumps({}))
 
-    assert list(pipfile.parse_pipfile_lock(tmp_path)) == []
+    assert not list(pipfile.parse_pipfile_lock(tmp_path))
 
 
 def test_skip_meta_section(tmp_path: Path) -> None:
     pipfile_lock = tmp_path / "Pipfile.lock"
     pipfile_lock.write_text(json.dumps({"_meta": {"pipfile-spec": 6}}))
 
-    assert list(pipfile.parse_pipfile_lock(pipfile_lock)) == []
+    assert not list(pipfile.parse_pipfile_lock(pipfile_lock))

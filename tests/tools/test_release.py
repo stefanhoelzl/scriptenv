@@ -48,7 +48,7 @@ def commit_factory(git_repo: GitRepo) -> CommitFactory:
     def _commit_factory(commits: List[str]) -> List[str]:
         for commit in commits:
             new_file_name = uuid().hex
-            Path(git_repo.workspace, new_file_name).write_text("")
+            Path(git_repo.workspace, new_file_name).write_text("", encoding="utf-8")
             git_repo.run(f"git add {new_file_name}", capture=True)
             git_repo.run(f'git commit -m"{commit}"', capture=True)
         return list(
@@ -83,7 +83,7 @@ def test_check_valid_commit_message(
     allowed_keyword: str, commit_factory: CommitFactory
 ) -> None:
     commit_factory([f"[{allowed_keyword}] message"])
-    assert list(release.check_commit_messages()) == []
+    assert not list(release.check_commit_messages())
 
 
 @pytest.mark.parametrize("message", ["no prefix"])
@@ -200,7 +200,7 @@ def test_release_candidate_fail_on_local_changes(
     git_repo.run('git commit -m"initial" --allow-empty')
     git_repo.run("git push -f origin master")
 
-    Path("local_change").write_text("")
+    Path("local_change").write_text("", encoding="utf-8")
     git_repo.run("git add local_change")
     git_repo.run('git commit -m"local-change"')
 

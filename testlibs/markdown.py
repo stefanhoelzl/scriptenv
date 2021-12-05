@@ -67,7 +67,7 @@ class MarkdownPythonCodeSection(pytest.Item):
             first_frame.lineno += self.lineno
             first_frame._line = (  # type: ignore
                 Path(first_frame.filename)
-                .read_text()
+                .read_text(encoding="utf-8")
                 .splitlines()[first_frame.lineno - 1]
             )
             return "".join(traceback.format_list(frame_summaries))
@@ -84,7 +84,7 @@ class MarkdownFile(pytest.File):
         """Collects python code sections from a markdown file."""
         markdown = MarkdownIt()
         section = 0
-        for token in markdown.parse(Path(self.fspath).read_text()):
+        for token in markdown.parse(Path(self.fspath).read_text(encoding="utf-8")):
             if token.tag == "code" and token.info == "python":
                 # token.map is zero based, but first line should be shown as 1
                 lineno = token.map[0] + 1 if token.map else 1

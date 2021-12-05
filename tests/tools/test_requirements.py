@@ -20,7 +20,7 @@ def create_workspace(tmp_path: Path) -> Generator[None, None, None]:
 
 
 def test_get() -> None:
-    Path("requirements.txt").write_text("pkg0==1.0.0\npkg1==1.0.0")
+    Path("requirements.txt").write_text("pkg0==1.0.0\npkg1==1.0.0", encoding="utf-8")
     assert list(requirements.get()) == [
         requirements.Requirement("pkg0", "1.0.0", Path("requirements.txt")),
         requirements.Requirement("pkg1", "1.0.0", Path("requirements.txt")),
@@ -28,7 +28,7 @@ def test_get() -> None:
 
 
 def test_get_ignore_empty_lines() -> None:
-    Path("requirements.txt").write_text("pkg==1.0.0\n   \n")
+    Path("requirements.txt").write_text("pkg==1.0.0\n   \n", encoding="utf-8")
     assert list(requirements.get()) == [
         requirements.Requirement("pkg", "1.0.0", Path("requirements.txt")),
     ]
@@ -46,7 +46,9 @@ def test_get_from_multiple_files() -> None:
 
 
 def test_get_updates(requests_mock: RequestsMocker) -> None:
-    Path("requirements.txt").write_text("update==1.0.0\nlatest==1.0.0")
+    Path("requirements.txt").write_text(
+        "update==1.0.0\nlatest==1.0.0", encoding="utf-8"
+    )
     requests_mock.get(
         "https://www.pypi.org/pypi/update/json", json=dict(info=dict(version="2.0.0"))
     )
@@ -60,11 +62,11 @@ def test_get_updates(requests_mock: RequestsMocker) -> None:
 
 
 def test_update(requests_mock: RequestsMocker) -> None:
-    Path("requirements.txt").write_text("pkg==1.0.0")
+    Path("requirements.txt").write_text("pkg==1.0.0", encoding="utf-8")
     requests_mock.get(
         "https://www.pypi.org/pypi/pkg/json", json=dict(info=dict(version="2.0.0"))
     )
 
     assert list(requirements.update()) == ["pkg: 1.0.0 => 2.0.0"]
 
-    assert Path("requirements.txt").read_text() == "pkg==2.0.0"
+    assert Path("requirements.txt").read_text(encoding="utf-8") == "pkg==2.0.0"

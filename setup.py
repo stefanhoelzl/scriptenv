@@ -16,7 +16,7 @@ setup(
     url="https://stefanhoelzl.github.io/scriptenv/",
     license="MIT",
     description="define virtual environments within your code",
-    long_description=Path("README.md").read_text(),
+    long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     keywords="virtualenv virtual environment venv scripting",
     classifiers=[
