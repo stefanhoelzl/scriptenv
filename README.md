@@ -16,11 +16,11 @@ $ pip install scriptenv
 use any package you want in your REPL or short-lived scripts
 ```python
 import scriptenv
-scriptenv.requires('requests==2.25.1')
+scriptenv.requires('rsa==4.8')
 
-import requests
-assert requests.__version__ == "2.25.1"
-requests.get('http://www.google.com')
+import rsa
+assert rsa.__version__ == "4.8"
+rsa.newkeys(32)
 ```
 
 use a binary/entry point defined in any package
@@ -75,4 +75,9 @@ $ pytest
 Trigger a new release build
 ```bash
 $ python tools/release.py release-candidate
+```
+
+Update all requirements
+```
+$ python tools/requirements.py update
 ```

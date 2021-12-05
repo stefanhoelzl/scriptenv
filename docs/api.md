@@ -2,21 +2,21 @@
 Defining requirements
 ```python
 import scriptenv
-scriptenv.requires("requests==2.25.1")
+scriptenv.requires('rsa==4.8')
 
-import requests
-assert requests.__version__ == "2.25.1"
+import rsa
+assert rsa.__version__ == "4.8"
 ```
 
 use `requires` as context manager
 ```python
 import scriptenv
 
-with scriptenv.requires("requests==2.25.1"):
-    import requests
-    assert requests.__version__ == "2.25.1" 
+with scriptenv.requires("rsa==4.8"):
+    import rsa
+    assert rsa.__version__ == "4.8" 
 
-with scriptenv.requires("requests==2.25.0"):
-    import requests
-    assert requests.__version__ == "2.25.0" 
+with scriptenv.requires("rsa==4.7"):
+    import rsa
+    assert rsa.__version__ == "4.7" 
 ```
