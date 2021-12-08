@@ -1,2 +1,1 @@
-fire==0.4.0
-semver==2.13.0
+git+https://github.com/stefanhoelzl/python-project-tools.git

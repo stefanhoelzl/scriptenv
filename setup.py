@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from setuptools import setup
-
 from tools.release import version
 
 ProjectName = "scriptenv"
