@@ -13,12 +13,11 @@ from pytest_mock import MockerFixture
 
 from testlibs.mockpi import MockPI
 
-pytest_plugins = ["testlibs.markdown"]
-
 
 @pytest.mark.tryfirst
 def pytest_configure(config: Config) -> None:
     """Setup default pytest options."""
+    config.option.docfiles = True
     config.option.newfirst = True
     config.option.failedfirst = True
     config.option.tbstyle = "short"
